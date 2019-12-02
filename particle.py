@@ -77,7 +77,8 @@ class Particle:
             # try to compute z1 using discrete legendre transforms if the integrator supports them
             if (hasattr(self.integrator.__class__, "legendreRight") and
                hasattr(self.integrator.__class__, "legendreLeftInverse")):
-                self.z1 = self.integrator.legendreLeftInverse(self.z0, self.p0, self.h)
+                points_z0z1p0p1 = z0z1p0p1(z0=None, p0=None, z1=self.z0, p1=self.p0)
+                self.z1 = self.integrator.legendreLeftInverse(points_z0z1p0p1, self.h)
                 self.p1 = self.integrator.legendreRight(self.z0, self.z1, self.h)
             else:
                 self.z1 = np.array(self.z0)
