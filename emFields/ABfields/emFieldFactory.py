@@ -4,6 +4,7 @@
 # field = EMFIeldFactory("Tokamak", config)
 from emFields.ABfields.tokamak import Tokamak
 from emFields.ABfields.gradShafranov_spline_A import GradShafranovSplineA
+from emFields.ABfields.gradShafranov_spline_AB import GradShafranovSplineAB
 
 
 def EMFieldFactory(fieldName, config):
@@ -11,6 +12,8 @@ def EMFieldFactory(fieldName, config):
         return Tokamak(config)
     if fieldName == "GradShafranovSplineA":
         return GradShafranovSplineA(config)
+    if fieldName == "GradShafranovSplineAB":
+        return GradShafranovSplineAB(config)
     # elif fieldName == "ForceFree":
     #     return ForceFree(config)
     # elif fieldName == "TwoDimField":
