@@ -11,8 +11,6 @@ class InitializationType(Enum):
 
 
 class Particle:
-    # Integrator<DIM>* auxiliaryIntegrator;
-
     def __init__(self, config):
         self.config = config
         self.integrator = integratorFactory(config.integrator, config)
@@ -77,9 +75,3 @@ class Particle:
 
     def getPoints(self):
         return z0z1p0p1(z0=self.z0, z1=self.z1, p0=self.p0, p1=self.p1)
-
-    def setPoints(self, points):
-        self.z0 = points.z0
-        self.z1 = points.z1
-        self.p0 = points.p0
-        self.p1 = points.p1
