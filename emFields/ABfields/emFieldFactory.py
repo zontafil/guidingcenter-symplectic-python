@@ -3,11 +3,14 @@
 # i.e. if you want to create a Tokamak field:
 # field = EMFIeldFactory("Tokamak", config)
 from emFields.ABfields.tokamak import Tokamak
+from emFields.ABfields.gradShafranov_spline_A import GradShafranovSplineA
 
 
 def EMFieldFactory(fieldName, config):
     if fieldName == "Tokamak":
         return Tokamak(config)
+    if fieldName == "GradShafranovSplineA":
+        return GradShafranovSplineA(config)
     # elif fieldName == "ForceFree":
     #     return ForceFree(config)
     # elif fieldName == "TwoDimField":
