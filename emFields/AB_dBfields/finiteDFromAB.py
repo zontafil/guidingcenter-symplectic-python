@@ -49,7 +49,6 @@ class FiniteDFromAB(AB_dB_FieldBuilder):
         Adag = A + u*b
 
         # COMPUTE GRADIENT(B),GRADIENT(phi),JAC(A_dagger)
-        A_jac = np.zeros([3, 3])
         B_grad = np.zeros(3)
         b_jac = np.zeros([3, 3])
         for j in range(3):
@@ -62,7 +61,6 @@ class FiniteDFromAB(AB_dB_FieldBuilder):
             B1norm = np.linalg.norm(B1)
             B0norm = np.linalg.norm(B0)
 
-            A_jac[:, j] = 0.5*(self.field.A(x1) - self.field.A(x0)) / self.hx
             B_grad[j] = 0.5*(B1norm - B0norm) / self.hx
             b_jac[:, j] = 0.5*(B1/B1norm - B0/B0norm) / self.hx
 
