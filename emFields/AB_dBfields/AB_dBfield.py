@@ -6,6 +6,7 @@
 from abc import ABC, abstractmethod
 import collections
 ABdBGuidingCenter = collections.namedtuple("ABdBGuidingCenter", "A Adag B Bgrad b Bnorm BHessian Bdag")
+BdBGuidingCenter = collections.namedtuple("BdBGuidingCenter", "B Bgrad b Bnorm BHessian Bdag")
 
 
 class AB_dB_FieldBuilder(ABC):
