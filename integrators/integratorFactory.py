@@ -3,8 +3,9 @@
 #
 # i.e. if you want to create a RK4 integrator:
 #  rk = integratorFactory("RK4", config)
-from integrators.rk4 import RK4
-from integrators.explicit4_gaugeFree import SymplecticExplicit4_GaugeFree
+from integrators.implementations.rk4 import RK4
+from integrators.implementations.explicit4_gaugeFree import SymplecticExplicit4_GaugeFree
+from integrators.implementations.explicit3 import SymplecticExplicit3
 
 
 def integratorFactory(integratorName, config):
@@ -16,8 +17,8 @@ def integratorFactory(integratorName, config):
     #     return SymplecticExplicit1(config)
     # elif integratorName == "SymplecticExplicit2":
     #     return SymplecticExplicit2(config)
-    # elif integratorName == "SymplecticExplicit3":
-    #     return SymplecticExplicit3(config)
+    elif integratorName == "SymplecticExplicit3":
+        return SymplecticExplicit3(config)
 
     # elif integratorName == "SymplecticExplicit4":
     #     return SymplecticExplicit4(config)
@@ -38,3 +39,12 @@ def integratorFactory(integratorName, config):
     # }
 
     raise Exception("Invalid integrator " + integratorName)
+
+
+def explicitIntegratorFactory(integratorName, config):
+    if integratorName == "RK4":
+        return RK4(config)
+    elif integratorName == "SymplecticExplicit4_GaugeInvariant":
+        return SymplecticExplicit4_GaugeFree(config)
+
+    raise Exception("Invalid first guess integrator " + integratorName)

@@ -61,13 +61,27 @@ class Particle:
                 points = z0z1p0p1(z1=self.z1, z0=None, p0=None, p1=None)
                 points = auxiliaryIntegrator.stepForward(points, self.h / self.config.initSteps)
                 self.z1 = points.z2
+
+            # try to compute initial p1 if the integrator supports position-momentum form
+            if hasattr(self.integrator.__class__, "legendreRight"):
+                self.p1 = self.integrator.legendreRight(self.z0, self.z1, self.h)
+
         elif init == InitializationType.MANUAL:
             self.z1 = self.z0
             self.p1 = self.p0
+
         elif init == InitializationType.HAMILTONIAN:
+            # initialize by imposing the continuous momenta to the discrete space
             self.p0 = self.integrator.system.momentum(self.z0)
-            self.z1 = self.integrator.legendreLeftInverse(self.z0, self.p0, self.h)
-            self.p1 = self.integrator.legendreRight(self.z0, self.z1, self.h)
+
+            # try to compute z1 using discrete legendre transforms if the integrator supports them
+            if (hasattr(self.integrator.__class__, "legendreRight") and
+               hasattr(self.integrator.__class__, "legendreLeftInverse")):
+                self.z1 = self.integrator.legendreLeftInverse(self.z0, self.p0, self.h)
+                self.p1 = self.integrator.legendreRight(self.z0, self.z1, self.h)
+            else:
+                self.z1 = np.array(self.z0)
+                self.p1 = np.array(self.p0)
 
         # compute initial energy
         self.Einit = self.integrator.system.hamiltonian(self.z0)
