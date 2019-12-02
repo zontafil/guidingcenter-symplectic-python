@@ -1,5 +1,5 @@
 from integrators.integrator import Integrator
-from particleUtils import z1p1
+from particleUtils import z2p2
 
 
 class RK4(Integrator):
@@ -15,4 +15,4 @@ class RK4(Integrator):
         k4 = self.system.f_eq_motion(z1 + h*k3)
 
         ret = (z1 + 1./6. * h * (k1+2.*k2+2.*k3+k4))
-        return z1p1(z1=ret, p1=None)
+        return z2p2(z2=ret, p2=None)

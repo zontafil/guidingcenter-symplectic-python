@@ -1,6 +1,7 @@
 from enum import Enum
 from integrators.integratorFactory import integratorFactory
 from particleUtils import z0z1p0p1
+import numpy as np
 
 
 class InitializationType(Enum):
@@ -25,16 +26,16 @@ class Particle:
         self.dE1 = (self.E1 - self.Einit) / self.Einit
 
     def stepForward(self):
+        # compute next time step
+        points = self.integrator.stepForward(self.getPoints(), self.h)
+
         # shift values
         self.z0 = self.z1
         self.p0 = self.p1
         self.dE0 = self.dE1
         self.E0 = self.E1
-
-        # compute next time step
-        points = self.integrator.stepForward(self.getPoints(), self.h)
-        self.z1 = points.z1
-        self.p1 = points.p1
+        self.z1 = points.z2
+        self.p1 = points.p2
 
         # compute conserved quantitiesEerr0
         self.computeEnergyError()
@@ -57,11 +58,11 @@ class Particle:
             if self.config.initSteps <= 0:
                 raise Exception("init_steps must be > 0")
             auxiliaryIntegrator = integratorFactory(self.config.auxiliaryIntegrator, self.config)
-            self.z1 = self.z0
+            self.z1 = np.array(self.z0)
             for i in range(self.config.initSteps):
                 points = z0z1p0p1(z1=self.z1, z0=None, p0=None, p1=None)
                 points = auxiliaryIntegrator.stepForward(points, self.h / self.config.initSteps)
-                self.z1 = points.z1
+                self.z1 = points.z2
         elif init == InitializationType.MANUAL:
             self.z1 = self.z0
             self.p1 = self.p0
