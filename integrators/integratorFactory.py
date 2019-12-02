@@ -9,11 +9,15 @@ from integrators.implementations.explicit3 import SymplecticExplicit3
 from integrators.implementations.explicit3_gaugeFree import SymplecticExplicit3GaugeFree
 from integrators.implementations.explicit4 import SymplecticExplicit4
 from integrators.implementations.variationalMidpoint import VariationalMidpoint
+from integrators.implementations.implicit1 import SymplecticImplicit1
+from integrators.implementations.euler import Euler
 
 
 def integratorFactory(integratorName, config):
     if integratorName == "RK4":
         return RK4(config)
+    elif integratorName == "Euler":
+        return Euler(config)
     elif integratorName == "VariationalMidpoint":
         return VariationalMidpoint(config)
     # elif integratorName == "SymplecticExplicit1":
@@ -26,8 +30,8 @@ def integratorFactory(integratorName, config):
         return SymplecticExplicit3GaugeFree(config)
     elif integratorName == "SymplecticExplicit4":
         return SymplecticExplicit4(config)
-    # elif integratorName == "SymplecticImplicit1":
-    #     return SymplecticImplicit1(config)
+    elif integratorName == "SymplecticImplicit1":
+        return SymplecticImplicit1(config)
     # elif integratorName == "symplecticSemiexplicitQin":
     #     return SemiexplicitQin(config)
     # elif integratorName == "symplecticSemiexplicitQinRegularized":

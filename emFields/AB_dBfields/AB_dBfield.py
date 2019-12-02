@@ -5,7 +5,7 @@
 # ABdB field struct for guiding center system
 from abc import ABC, abstractmethod
 import collections
-ABdBGuidingCenter = collections.namedtuple("ABdBGuidingCenter", "A Adag B Bgrad b Bnorm BHessian Bdag")
+ABdBGuidingCenter = collections.namedtuple("ABdBGuidingCenter", "A Adag Adag_jac B Bgrad b Bnorm BHessian Bdag")
 BdBGuidingCenter = collections.namedtuple("BdBGuidingCenter", "B Bgrad b Bnorm BHessian Bdag")
 
 
