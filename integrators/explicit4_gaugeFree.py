@@ -12,7 +12,8 @@ class SymplecticExplicit4_GaugeFree(Integrator):
         z1 = points.z1
         z0 = points.z0
         ABdB = self.system.fieldBuilder.compute(z1)
-        BHessian = np.zeros([3, 3])
+        # BHessian = np.zeros([3, 3])
+        BHessian = ABdB.BHessian
 
         # build omega1
         omega1 = np.zeros([4, 4])
