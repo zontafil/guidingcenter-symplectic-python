@@ -5,8 +5,9 @@ from integrators.variationalIntegrators.viariationalDiscreteLagrangian import Va
 
 class VariationalTrapezoidal(VariationalDiscreteLagrangian):
 
-    def __init__(self, config):
-        self.alpha = config.alpha
+    def __init__(self, config, alpha):
+        super().__init__(config)
+        self.alpha = alpha
 
     def discreteLagrangian(self, z0, z1, h):
         qalpha = (1. - self.alpha) * z0 + self.alpha * z1

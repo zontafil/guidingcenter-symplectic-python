@@ -1,17 +1,18 @@
 # construct a variational integrator starting from a discrete lagrangian.
 # the integrator is in general implicit, that's why it's an implementation of VariationalImplicit
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from integrators.variationalIntegrators.variationalImplicit import VariationalImplicit
 import numpy as np
 
 
-class VariationalDiscreteLagrangian(ABC, VariationalImplicit):
+class VariationalDiscreteLagrangian(VariationalImplicit):
     # discrete lagrangian
     @abstractmethod
     def discreteLagrangian(self, z0, z1, h):
         pass
 
     def __init__(self, config):
+        super().__init__(config)
         self.hx = config.hx
 
     def legendreLeft(self, z0, z1, h):

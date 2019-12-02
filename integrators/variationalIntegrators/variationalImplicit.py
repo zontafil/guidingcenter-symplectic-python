@@ -1,18 +1,19 @@
 # variational integrator, implicit version.
 # compute legendre left inverse using a first guess integrator and newton iterations
-from integrators.integratorFactory import explicitIntegratorFactory
-from abc import ABC, abstractmethod
+from integrators.explicitIntegratorFactory import explicitIntegratorFactory
+from abc import abstractmethod
 from integrators.variationalIntegrators.variationalIntegrator import VariationalIntegrator
 import numpy as np
 
 
-class VariationalImplicit(ABC, VariationalIntegrator):
+class VariationalImplicit(VariationalIntegrator):
 
     @abstractmethod
     def legendreLeft(self, z0, z1, h):
         pass
 
     def __init__(self, config):
+        super().__init__(config)
         self.firstGuess = explicitIntegratorFactory(config.firstGuessIntegrator, config)
         self.implicitIterations = config.implicit_iterations
         self.hx = config.hx

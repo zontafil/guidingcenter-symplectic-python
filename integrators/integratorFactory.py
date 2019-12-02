@@ -8,13 +8,14 @@ from integrators.implementations.explicit4_gaugeFree import SymplecticExplicit4_
 from integrators.implementations.explicit3 import SymplecticExplicit3
 from integrators.implementations.explicit3_gaugeFree import SymplecticExplicit3GaugeFree
 from integrators.implementations.explicit4 import SymplecticExplicit4
+from integrators.implementations.variationalMidpoint import VariationalMidpoint
 
 
 def integratorFactory(integratorName, config):
     if integratorName == "RK4":
         return RK4(config)
-    # elif integratorName == "VariationalMidpoint":
-    #     return VariationalMidpoint(config)
+    elif integratorName == "VariationalMidpoint":
+        return VariationalMidpoint(config)
     # elif integratorName == "SymplecticExplicit1":
     #     return SymplecticExplicit1(config)
     # elif integratorName == "SymplecticExplicit2":
@@ -41,12 +42,3 @@ def integratorFactory(integratorName, config):
     # }
 
     raise Exception("Invalid integrator " + integratorName)
-
-
-def explicitIntegratorFactory(integratorName, config):
-    if integratorName == "RK4":
-        return RK4(config)
-    elif integratorName == "SymplecticExplicit4_GaugeInvariant":
-        return SymplecticExplicit4_GaugeFree(config)
-
-    raise Exception("Invalid first guess integrator " + integratorName)
