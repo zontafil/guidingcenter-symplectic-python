@@ -4,6 +4,7 @@
 # i.e. if you want to create a RK4 integrator:
 #  rk = integratorFactory("RK4", config)
 from integrators.rk4 import RK4
+from integrators.explicit4_gaugeFree import SymplecticExplicit4_GaugeFree
 
 
 def integratorFactory(integratorName, config):
@@ -27,8 +28,8 @@ def integratorFactory(integratorName, config):
     #     return SemiexplicitQin(config)
     # elif integratorName == "symplecticSemiexplicitQinRegularized":
     #     return SemiexplicitQinReg(config)
-    # elif integratorName == "SymplecticExplicit4_GaugeInvariant":
-    #     return SymplecticExplicit4_GaugeFree(config)
+    elif integratorName == "SymplecticExplicit4_GaugeInvariant":
+        return SymplecticExplicit4_GaugeFree(config)
     # elif integratorName == "SymplecticExplicit3_GaugeInvariant":
     #     return SymplecticExplicit3_GaugeFree(config)
 
