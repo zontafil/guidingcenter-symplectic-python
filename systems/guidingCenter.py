@@ -11,20 +11,6 @@ from emFields.AB_dBfields.AB_dBfactory import AB_dB_FieldFactory
 
 
 class GuidingCenter(System):
-    # private:
-    #     double mu;
-    #     double hx;
-    # public:
-    #     GuidingCenter(Config::Config* config);
-    #     ~GuidingCenter(){};
-
-    #     double Hamiltonian(PositionMomentumPoint<DIM> z);
-    #     double Lagrangian(Matrix<double,DIM/2,1> q, Matrix<double,DIM/2,1> v);
-    #     Matrix<double,DIM/2,1> momentum(PositionPoints<DIM> q);
-    #     Matrix<double,DIM,1> f_eq_motion(Matrix<double,DIM,1> z);
-
-    #     AB_dB_FieldBuilder<DIM> *fieldconfig;
-
     def __init__(self, config):
         self.mu = config.mu
         self.hx = config.hx  # step for numerical derivative
