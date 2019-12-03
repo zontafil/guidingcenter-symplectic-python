@@ -2,6 +2,8 @@ from enum import Enum
 from integrators.integratorFactory import integratorFactory
 from particleUtils import z0z1p0p1
 import numpy as np
+from emFields.AB_dBfields.finiteDFromAB import FiniteDFromAB
+from emFields.AB_dBfields.gradShafranov_ABdB import GradShafranov_ABdB
 
 
 class InitializationType(Enum):
@@ -26,6 +28,12 @@ class Particle:
     def stepForward(self):
         # compute next time step
         points = self.integrator.stepForward(self.getPoints(), self.h)
+
+        DfromAB = FiniteDFromAB(self.config)
+        ShafABdB = GradShafranov_ABdB(self.config)
+        print("point {}".format(self.z1))
+        print(DfromAB.compute(self.z1))
+        print(ShafABdB.compute(self.z1))
 
         # shift values
         self.z0 = self.z1

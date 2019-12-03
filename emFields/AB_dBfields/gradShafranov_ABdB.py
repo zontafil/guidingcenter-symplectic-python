@@ -158,26 +158,26 @@ class GradShafranov_ABdB(AB_dB_FieldBuilder):
         # Bjac_comp = np.zeros([3, 3])
 
         # Adag_jac = np.zeros([3, 3])
-        for j in range(3):
-            x0 = np.array(x)
-            x1 = np.array(x)
-            x0[j] -= self.hx
-            x1[j] += self.hx
+        # for j in range(3):
+        #     x0 = np.array(x)
+        #     x1 = np.array(x)
+        #     x0[j] -= self.hx
+        #     x1[j] += self.hx
 
-            r0 = np.sqrt(x0[0]**2 + x0[1]**2)
-            B0dB = self.B_dB_cyl(r0, x0[2])
-            B0cyl = np.array([B0dB[0], B0dB[1], B0dB[2]])
-            B0 = cyl2cart(B0cyl, x0)
-            r1 = np.sqrt(x1[0]**2 + x1[1]**2)
-            B1dB = self.B_dB_cyl(r1, x1[2])
-            B1cyl = np.array([B1dB[0], B1dB[1], B1dB[2]])
-            B1 = cyl2cart(B1cyl, x1)
+        #     r0 = np.sqrt(x0[0]**2 + x0[1]**2)
+        #     B0dB = self.B_dB_cyl(r0, x0[2])
+        #     B0cyl = np.array([B0dB[0], B0dB[1], B0dB[2]])
+        #     B0 = cyl2cart(B0cyl, x0)
+        #     r1 = np.sqrt(x1[0]**2 + x1[1]**2)
+        #     B1dB = self.B_dB_cyl(r1, x1[2])
+        #     B1cyl = np.array([B1dB[0], B1dB[1], B1dB[2]])
+        #     B1 = cyl2cart(B1cyl, x1)
 
-            B1norm = np.linalg.norm(B1)
-            B0norm = np.linalg.norm(B0)
+        #     B1norm = np.linalg.norm(B1)
+        #     B0norm = np.linalg.norm(B0)
 
-            # Bjac_comp[:, j] = 0.5*(B1 - B0) / self.hx
-            # Adag_jac[:, j] = Ajac[:, j] + 0.5*(u*B1/B1norm - u*B0/B0norm) / self.hx
+        #     # Bjac_comp[:, j] = 0.5*(B1 - B0) / self.hx
+        #     # Adag_jac[:, j] = Ajac[:, j] + 0.5*(u*B1/B1norm - u*B0/B0norm) / self.hx
 
         # compute |B| hessian
         d2B_d2R = np.array([BdB[12], BdB[15], BdB[18]])
