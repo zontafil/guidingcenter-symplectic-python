@@ -16,6 +16,7 @@ class GradShafranov_ABdB(AB_dB_FieldBuilder):
     def __init__(self, config):
         self.eqdsk = EqdskReader(config.eqdskFile)
         self.R0 = config.R0
+        self.hx = config.hx
 
         print("EQDSK: range r: {} {}".format(self.eqdsk.r_min, self.eqdsk.r_max))
         print("EQDSK: range z: {} {}".format(self.eqdsk.z_min, self.eqdsk.z_max))
@@ -70,10 +71,30 @@ class GradShafranov_ABdB(AB_dB_FieldBuilder):
     def A(self, x):
         r = np.sqrt(x[0]**2 + x[1]**2)
         z = x[2]
+        theta = np.arctan(x[1]/x[0])
+
         psi = self.eqdsk.psi_spl(x=r, y=z)[0][0]
+        dpsi_dR = self.eqdsk.psi_spl(x=r, y=z, dx=1, dy=0, grid=True)[0][0]
+        dpsi_dz = self.eqdsk.psi_spl(x=r, y=z, dx=0, dy=1, grid=True)[0][0]
 
         Acyl = np.array([0, psi/r, np.log(r / self.R0)])
-        return cyl2cart(Acyl, x)
+        A = cyl2cart(Acyl, x)
+
+        # compute Ajac
+        dAx_dr = psi / r**2 * np.sin(theta) - dpsi_dR / r * np.sin(theta)
+        dAx_dp = - psi / r**2 * np.cos(theta)
+        dAx_dz = - dpsi_dz / r * np.sin(theta)
+        dAy_dr = - psi / r**2 * np.cos(theta) + dpsi_dR / r * np.cos(theta)
+        dAy_dp = - psi / r**2 * np.sin(theta)
+        dAy_dz = dpsi_dz / r * np.cos(theta)
+        dAz_dr = 1 / r
+        dAz_dp = 0
+        dAz_dz = 0
+        Ajac = np.zeros([3, 3])
+        Ajac[0, :] = cyl2cart(np.array([dAx_dr, dAx_dp, dAx_dz]), x)
+        Ajac[1, :] = cyl2cart(np.array([dAy_dr, dAy_dp, dAy_dz]), x)
+        Ajac[2, :] = cyl2cart(np.array([dAz_dr, dAz_dp, dAz_dz]), x)
+        return [A, Ajac]
 
     def compute(self, z):
         x = z[:3]
@@ -89,16 +110,17 @@ class GradShafranov_ABdB(AB_dB_FieldBuilder):
         Bnorm = np.linalg.norm(B)
         b = B / Bnorm
 
-        A = self.A(x)
+        A_Ajac = self.A(x)
+        A = A_Ajac[0]
+        Ajac = A_Ajac[1]
         Adag = A + u * b
 
-        # build curl B and Bdag (cyl and cartesian)
+        # build curl B (cyl and cartesian)
         Bcurl_cyl = np.zeros(3)
         Bcurl_cyl[0] = - BdB[8]
         Bcurl_cyl[1] = BdB[5] - BdB[9]
         Bcurl_cyl[2] = Bcyl[1] / r + BdB[6]
         Bcurl = cyl2cart(Bcurl_cyl, x)
-        Bdag = B + u * Bcurl / Bnorm
 
         # build grad|B| (cyl and cartesian)
         dB_dR = np.array([BdB[3], BdB[6], BdB[9]])
@@ -110,7 +132,54 @@ class GradShafranov_ABdB(AB_dB_FieldBuilder):
         gradB_cyl /= Bnorm
         B_grad = cyl2cart(gradB_cyl, x)
 
-        # compute B hessian
+        # build grad(1/|B|) and Bdag
+        grad1_B = - B_grad / Bnorm**2
+        Bdag = B + u * Bcurl / Bnorm + u * np.cross(grad1_B, B)
+
+        # compute Bjac
+        dBx_dr = BdB[3] * np.cos(theta) - BdB[6] * np.sin(theta)
+        dBx_dp = - BdB[0] * np.sin(theta) / r - BdB[1] * np.cos(theta) / r
+        dBx_dz = BdB[5] * np.cos(theta) - BdB[8] * np.sin(theta) / r
+        dBy_dr = BdB[3] * np.sin(theta) + BdB[6] * np.cos(theta)
+        dBy_dp = + BdB[0] * np.cos(theta) / r - BdB[1] * np.sin(theta) / r
+        dBy_dz = BdB[5] * np.sin(theta) + BdB[8] * np.cos(theta) / r
+        dBz_dr = BdB[9]
+        dBz_dp = 0
+        dBz_dz = BdB[11]
+        Bjac = np.zeros([3, 3])
+        Bjac[0, :] = cyl2cart(np.array([dBx_dr, dBx_dp, dBx_dz]), x)
+        Bjac[1, :] = cyl2cart(np.array([dBy_dr, dBy_dp, dBy_dz]), x)
+        Bjac[2, :] = cyl2cart(np.array([dBz_dr, dBz_dp, dBz_dz]), x)
+
+        Adag_jac = Ajac + u * Bjac / Bnorm
+        Adag_jac[0, :] += u * B[0] * np.transpose(grad1_B)
+        Adag_jac[1, :] += u * B[1] * np.transpose(grad1_B)
+        Adag_jac[2, :] += u * B[2] * np.transpose(grad1_B)
+        # Bjac_comp = np.zeros([3, 3])
+
+        # Adag_jac = np.zeros([3, 3])
+        for j in range(3):
+            x0 = np.array(x)
+            x1 = np.array(x)
+            x0[j] -= self.hx
+            x1[j] += self.hx
+
+            r0 = np.sqrt(x0[0]**2 + x0[1]**2)
+            B0dB = self.B_dB_cyl(r0, x0[2])
+            B0cyl = np.array([B0dB[0], B0dB[1], B0dB[2]])
+            B0 = cyl2cart(B0cyl, x0)
+            r1 = np.sqrt(x1[0]**2 + x1[1]**2)
+            B1dB = self.B_dB_cyl(r1, x1[2])
+            B1cyl = np.array([B1dB[0], B1dB[1], B1dB[2]])
+            B1 = cyl2cart(B1cyl, x1)
+
+            B1norm = np.linalg.norm(B1)
+            B0norm = np.linalg.norm(B0)
+
+            # Bjac_comp[:, j] = 0.5*(B1 - B0) / self.hx
+            # Adag_jac[:, j] = Ajac[:, j] + 0.5*(u*B1/B1norm - u*B0/B0norm) / self.hx
+
+        # compute |B| hessian
         d2B_d2R = np.array([BdB[12], BdB[15], BdB[18]])
         d2B_dRdz = np.array([BdB[13], BdB[16], BdB[19]])
         d2B_d2z = np.array([BdB[14], BdB[17], BdB[20]])
@@ -133,4 +202,5 @@ class GradShafranov_ABdB(AB_dB_FieldBuilder):
         BHessian[1, :] = cyl2cart(gradCyl_dmodB_dy, x)
         BHessian[2, :] = cyl2cart(gradCyl_dmodB_dz, x)
 
-        return ABdBGuidingCenter(A=A, Adag=Adag, B=B, Bgrad=B_grad, b=b, Bnorm=Bnorm, BHessian=BHessian, Bdag=Bdag)
+        return ABdBGuidingCenter(Adag_jac=Adag_jac, A=A, Adag=Adag,
+                                 B=B, Bgrad=B_grad, b=b, Bnorm=Bnorm, BHessian=BHessian, Bdag=Bdag)
