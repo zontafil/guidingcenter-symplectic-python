@@ -8,12 +8,70 @@ class SymplecticExplicit4_GaugeFree(Integrator):
         super().__init__(config)
         self.mu = self.config.mu
 
+    def Bgradnum(self, z):
+        Bgrad = np.zeros(3)
+        for j in range(3):
+            z1p = np.array(z)
+            z1m = np.array(z)
+            z1p2 = np.array(z)
+            z1m2 = np.array(z)
+            z1m[j] -= self.config.hx
+            z1p[j] += self.config.hx
+            z1m2[j] -= 2 * self.config.hx
+            z1p2[j] += 2 * self.config.hx
+            B1 = self.system.fieldBuilder.compute(z1p)
+            B0 = self.system.fieldBuilder.compute(z1m)
+            Bp2 = self.system.fieldBuilder.compute(z1p2)
+            Bm2 = self.system.fieldBuilder.compute(z1m2)
+            # Bgrad[j] = 0.5*(np.linalg.norm(B1.Bnorm) - np.linalg.norm(B0.Bnorm)) / self.config.hx
+            Bgrad[j] = (1/12 * Bm2.Bnorm - 2/3 * B0.Bnorm + 2/3 * B1.Bnorm - 1/12 * Bp2.Bnorm) / self.config.hx
+        return Bgrad
+
     def stepForward(self, points, h):
         z1 = points.z1
         z0 = points.z0
         ABdB = self.system.fieldBuilder.compute(z1)
         # BHessian = np.zeros([3, 3])
         BHessian = ABdB.BHessian
+
+        # Bgrad = self.Bgradnum(z1)
+
+        # BHes_num_fromB = np.zeros([3, 3])
+        # for j in range(3):
+        #     z1p = np.array(z1)
+        #     z1m = np.array(z1)
+        #     z1p2 = np.array(z1)
+        #     z1m2 = np.array(z1)
+        #     z1m[j] -= self.config.hx
+        #     z1p[j] += self.config.hx
+        #     z1m2[j] -= 2 * self.config.hx
+        #     z1p2[j] += 2 * self.config.hx
+        #     # BHes_num_fromB[:, j] = 0.5*(self.Bgradnum(z1p) - self.Bgradnum(z1m)) / self.config.hx
+        #     Bgradp2 = self.Bgradnum(z1p2)
+        #     Bgradp1 = self.Bgradnum(z1p)
+        #     Bgradm2 = self.Bgradnum(z1m2)
+        #     Bgradm1 = self.Bgradnum(z1m)
+        #     BHes_num_fromB[:, j] = (1/12 * Bgradm2 - 2/3 * Bgradm1 + 2/3 * Bgradp1 - 1/12 * Bgradp2) / self.config.hx
+
+        BHes = np.zeros([3, 3])
+        for j in range(3):
+            z1p = np.array(z1)
+            z1m = np.array(z1)
+            z1m[j] -= self.config.hx
+            z1p[j] += self.config.hx
+            B1 = self.system.fieldBuilder.compute(z1p)
+            B0 = self.system.fieldBuilder.compute(z1m)
+            BHes[:, j] = 0.5*(B1.Bgrad - B0.Bgrad) / self.config.hx
+        BHessian = BHes
+
+        # print("====")
+        # print(ABdB.BHessian[0,0])
+        # print(BHes[0,0])
+        # print(BHes_num_fromB[0,0])
+        # print("====")
+        # print(ABdB.Bgrad[0])
+        # print(Bgrad[0])
+        
 
         # build omega1
         omega1 = np.zeros([4, 4])

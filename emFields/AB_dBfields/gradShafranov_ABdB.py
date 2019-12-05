@@ -105,6 +105,30 @@ class GradShafranov_ABdB(AB_dB_FieldBuilder):
         BdB = self.B_dB_cyl(r, x[2])
         Bcyl = np.array([BdB[0], BdB[1], BdB[2]])
 
+        # r1 = r + self.hx
+        # r0 = r - self.hx
+        # z1 = x[2] + self.hx
+        # z0 = x[2] - self.hx
+        # BdB1 = self.B_dB_cyl(r1, x[2])
+        # BdB0 = self.B_dB_cyl(r0, x[2])
+        # BdBz1 = self.B_dB_cyl(r, z1)
+        # BdBz0 = self.B_dB_cyl(r, z0)
+        # dBR_dR = 0.5 * (BdB1[0] - BdB0[0]) / self.hx - BdB[3]
+        # dBR_dz = 0.5 * (BdBz1[0] - BdBz0[0]) / self.hx - BdB[5]
+        # dBp_dR = 0.5 * (BdB1[1] - BdB0[1]) / self.hx - BdB[6]
+        # dBp_dz = 0.5 * (BdBz1[1] - BdBz0[1]) / self.hx - BdB[8]
+        # dBz_dR = 0.5 * (BdB1[2] - BdB0[2]) / self.hx - BdB[9]
+        # dBz_dz = 0.5 * (BdBz1[2] - BdBz0[2]) / self.hx - BdB[11]
+        # d2BR_d2R = 0.5 * (BdB1[3] - BdB0[3]) / self.hx - BdB[12]
+        # d2BR_dRdz = 0.5 * (BdBz1[3] - BdBz0[3]) / self.hx - BdB[13]
+        # d2BR_d2z = 0.5 * (BdBz1[5] - BdBz0[5]) / self.hx - BdB[14]
+        # d2Bp_d2R = 0.5 * (BdB1[6] - BdB0[6]) / self.hx - BdB[15]
+        # d2Bp_dRdz = 0.5 * (BdBz1[6] - BdBz0[6]) / self.hx - BdB[16]
+        # d2Bp_d2z = 0.5 * (BdBz1[8] - BdBz0[8]) / self.hx - BdB[17]
+        # d2Bz_d2R = 0.5 * (BdB1[9] - BdB0[9]) / self.hx - BdB[18]
+        # d2Bz_dRdz = 0.5 * (BdBz1[9] - BdBz0[9]) / self.hx - BdB[19]
+        # d2Bz_d2z = 0.5 * (BdBz1[11] - BdBz0[11]) / self.hx - BdB[20]
+
         # build B, B and |B| (cartesian)
         B = cyl2cart(Bcyl, x)
         Bnorm = np.linalg.norm(B)
@@ -131,6 +155,18 @@ class GradShafranov_ABdB(AB_dB_FieldBuilder):
         gradB_cyl[2] = np.dot(Bcyl, dB_dz)
         gradB_cyl /= Bnorm
         B_grad = cyl2cart(gradB_cyl, x)
+
+        # ==== DEBUG
+        # B1 =  np.array([BdB1[0], BdB1[1], BdB1[2]])
+        # B0 =  np.array([BdB0[0], BdB0[1], BdB0[2]])
+        # Bz1 = np.array([BdBz1[0], BdBz1[1], BdBz1[2]])
+        # Bz0 = np.array([BdBz0[0], BdBz0[1], BdBz0[2]])
+        # modB1 = np.linalg.norm(B1)
+        # modB0 = np.linalg.norm(B0)
+        # modBz1 = np.linalg.norm(Bz1)
+        # modBz0 = np.linalg.norm(Bz0)
+        # dmodB_dr = 0.5 * (modB1 - modB0) / self.hx - gradB_cyl[0]
+        # dmodB_dz = 0.5 * (modBz1 - modBz0) / self.hx - gradB_cyl[2]
 
         # build grad(1/|B|) and Bdag
         grad1_B = - B_grad / Bnorm**2
@@ -203,4 +239,9 @@ class GradShafranov_ABdB(AB_dB_FieldBuilder):
         BHessian[2, :] = cyl2cart(gradCyl_dmodB_dz, x)
 
         return ABdBGuidingCenter(Adag_jac=Adag_jac, A=A, Adag=Adag,
-                                 B=B, Bgrad=B_grad, b=b, Bnorm=Bnorm, BHessian=BHessian, Bdag=Bdag)
+                                 B=B, Bgrad=B_grad, b=b, Bnorm=Bnorm, BHessian=BHessian, Bdag=Bdag,
+                                 d2modB_d2R=d2modB_d2R, d2modB_dRdz=d2modB_dRdz, d2modB_d2z=d2modB_d2z,
+                                 gradB_cyl=gradB_cyl,
+                                 gradCyl_dmodB_dx=gradCyl_dmodB_dx,
+                                 gradCyl_dmodB_dy=gradCyl_dmodB_dy,
+                                 gradCyl_dmodB_dz=gradCyl_dmodB_dz)

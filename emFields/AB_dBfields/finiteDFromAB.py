@@ -67,7 +67,7 @@ class FiniteDFromAB(AB_dB_FieldBuilder):
             b_jac[:, j] = 0.5*(B1/B1norm - B0/B0norm) / self.hx
 
         # COMPUTE B_dagger
-        Bdag = B
+        Bdag = np.array(B)
         Bdag[0] += u*(b_jac[2, 1] - b_jac[1, 2])
         Bdag[1] += u*(b_jac[0, 2] - b_jac[2, 0])
         Bdag[2] += u*(b_jac[1, 0] - b_jac[0, 1])
@@ -75,4 +75,6 @@ class FiniteDFromAB(AB_dB_FieldBuilder):
         BHessian = self.B_Hessian(x)
 
         return ABdBGuidingCenter(A=A, Adag_jac=Adag_jac, Adag=Adag, B=B,
-                                 Bgrad=B_grad, b=b, Bnorm=Bnorm, BHessian=BHessian, Bdag=Bdag)
+                                 Bgrad=B_grad, b=b, Bnorm=Bnorm, BHessian=BHessian, Bdag=Bdag,
+                                 d2modB_d2R=None, d2modB_dRdz=None, d2modB_d2z=None, gradB_cyl=None,
+                                 gradCyl_dmodB_dx=None, gradCyl_dmodB_dy=None, gradCyl_dmodB_dz=None)
