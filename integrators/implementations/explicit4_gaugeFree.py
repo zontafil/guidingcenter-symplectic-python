@@ -53,16 +53,15 @@ class SymplecticExplicit4_GaugeFree(Integrator):
         #     Bgradm1 = self.Bgradnum(z1m)
         #     BHes_num_fromB[:, j] = (1/12 * Bgradm2 - 2/3 * Bgradm1 + 2/3 * Bgradp1 - 1/12 * Bgradp2) / self.config.hx
 
-        BHes = np.zeros([3, 3])
-        for j in range(3):
-            z1p = np.array(z1)
-            z1m = np.array(z1)
-            z1m[j] -= self.config.hx
-            z1p[j] += self.config.hx
-            B1 = self.system.fieldBuilder.compute(z1p)
-            B0 = self.system.fieldBuilder.compute(z1m)
-            BHes[:, j] = 0.5*(B1.Bgrad - B0.Bgrad) / self.config.hx
-        BHessian = BHes
+        if self.config.BHessian_num:
+            for j in range(3):
+                z1p = np.array(z1)
+                z1m = np.array(z1)
+                z1m[j] -= self.config.hx
+                z1p[j] += self.config.hx
+                B1 = self.system.fieldBuilder.compute(z1p)
+                B0 = self.system.fieldBuilder.compute(z1m)
+                BHessian[:, j] = 0.5*(B1.Bgrad - B0.Bgrad) / self.config.hx
 
         # print("====")
         # print(ABdB.BHessian[0,0])
