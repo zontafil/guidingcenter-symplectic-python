@@ -7,6 +7,8 @@ class SymplecticExplicit4_GaugeFree(Integrator):
     def __init__(self, config):
         super().__init__(config)
         self.mu = self.config.mu
+        file = open("bhes.txt", "w+")
+        file.close()
 
     def Bgradnum(self, z):
         Bgrad = np.zeros(3)
@@ -31,8 +33,8 @@ class SymplecticExplicit4_GaugeFree(Integrator):
         z1 = points.z1
         z0 = points.z0
         ABdB = self.system.fieldBuilder.compute(z1)
-        # BHessian = np.zeros([3, 3])
-        BHessian = ABdB.BHessian
+        BHessian = np.zeros([3, 3])
+        # BHessian = np.array(ABdB.BHessian)
 
         # Bgrad = self.Bgradnum(z1)
 
@@ -62,8 +64,14 @@ class SymplecticExplicit4_GaugeFree(Integrator):
                 B0 = self.system.fieldBuilder.compute(z1m)
                 BHessian[:, j] = 0.5*(B1.Bgrad - B0.Bgrad) / self.config.hx
 
+        file = open("bhes.txt", "a")
         # print("====")
-        # print(ABdB.BHessian[0,0])
+        dBhes = ABdB.BHessian - BHessian
+        for i in range(3):
+            for j in range(3):
+                file.write("{:.12f} ".format(dBhes[i, j]))
+        file.write("\n")
+        file.close()
         # print(BHes[0,0])
         # print(BHes_num_fromB[0,0])
         # print("====")
