@@ -36,22 +36,22 @@ class SymplecticExplicit4_GaugeFree(Integrator):
 
         # Bgrad = self.Bgradnum(z1)
 
-        # BHes_num_fromB = np.zeros([3, 3])
-        # for j in range(3):
-        #     z1p = np.array(z1)
-        #     z1m = np.array(z1)
-        #     z1p2 = np.array(z1)
-        #     z1m2 = np.array(z1)
-        #     z1m[j] -= self.config.hx
-        #     z1p[j] += self.config.hx
-        #     z1m2[j] -= 2 * self.config.hx
-        #     z1p2[j] += 2 * self.config.hx
-        #     # BHes_num_fromB[:, j] = 0.5*(self.Bgradnum(z1p) - self.Bgradnum(z1m)) / self.config.hx
-        #     Bgradp2 = self.Bgradnum(z1p2)
-        #     Bgradp1 = self.Bgradnum(z1p)
-        #     Bgradm2 = self.Bgradnum(z1m2)
-        #     Bgradm1 = self.Bgradnum(z1m)
-        #     BHes_num_fromB[:, j] = (1/12 * Bgradm2 - 2/3 * Bgradm1 + 2/3 * Bgradp1 - 1/12 * Bgradp2) / self.config.hx
+        if self.config.BHessian_num_4:
+            for j in range(3):
+                z1p = np.array(z1)
+                z1m = np.array(z1)
+                z1p2 = np.array(z1)
+                z1m2 = np.array(z1)
+                z1m[j] -= self.config.hx
+                z1p[j] += self.config.hx
+                z1m2[j] -= 2 * self.config.hx
+                z1p2[j] += 2 * self.config.hx
+                # BHes_num_fromB[:, j] = 0.5*(self.Bgradnum(z1p) - self.Bgradnum(z1m)) / self.config.hx
+                Bgradp2 = self.Bgradnum(z1p2)
+                Bgradp1 = self.Bgradnum(z1p)
+                Bgradm2 = self.Bgradnum(z1m2)
+                Bgradm1 = self.Bgradnum(z1m)
+                BHessian[:, j] = (1/12 * Bgradm2 - 2/3 * Bgradm1 + 2/3 * Bgradp1 - 1/12 * Bgradp2) / self.config.hx
 
         if self.config.BHessian_num:
             for j in range(3):
@@ -70,7 +70,6 @@ class SymplecticExplicit4_GaugeFree(Integrator):
         # print("====")
         # print(ABdB.Bgrad[0])
         # print(Bgrad[0])
-        
 
         # build omega1
         omega1 = np.zeros([4, 4])
