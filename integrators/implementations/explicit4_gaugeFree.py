@@ -67,8 +67,10 @@ class SymplecticExplicit4_GaugeFree(Integrator):
         file = open("bhes.txt", "a")
         # print("====")
         dBhes = ABdB.BHessian - BHessian
+        theta = np.arctan(points.z1[1]/points.z1[0])
         file.write("{} ".format(t))
         file.write("{:.12f} ".format(np.sqrt(points.z1[0]**2 + points.z1[1]**2)))
+        file.write("{:.12f} ".format(theta))
         for i in range(3):
             file.write("{:.12f} ".format(points.z1[i]))
         for i in range(3):
