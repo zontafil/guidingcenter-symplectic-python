@@ -29,7 +29,7 @@ class SymplecticExplicit4_GaugeFree(Integrator):
             Bgrad[j] = (1/12 * Bm2.Bnorm - 2/3 * B0.Bnorm + 2/3 * B1.Bnorm - 1/12 * Bp2.Bnorm) / self.config.hx
         return Bgrad
 
-    def stepForward(self, points, h):
+    def stepForward(self, points, h, t):
         z1 = points.z1
         z0 = points.z0
         ABdB = self.system.fieldBuilder.compute(z1)
@@ -67,7 +67,10 @@ class SymplecticExplicit4_GaugeFree(Integrator):
         file = open("bhes.txt", "a")
         # print("====")
         dBhes = ABdB.BHessian - BHessian
+        file.write("{} ".format(t))
+        file.write("{:.12f} ".format(np.sqrt(points.z1[0]**2 + points.z1[1]**2)))
         for i in range(3):
+            file.write("{:.12f} ".format(points.z1[i]))
             for j in range(3):
                 file.write("{:.12f} ".format(dBhes[i, j]))
         file.write("\n")

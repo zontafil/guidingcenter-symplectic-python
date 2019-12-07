@@ -25,9 +25,9 @@ class Particle:
         self.E1 = self.integrator.system.hamiltonian(self.z1)
         self.dE1 = (self.E1 - self.Einit) / self.Einit
 
-    def stepForward(self):
+    def stepForward(self, t):
         # compute next time step
-        points = self.integrator.stepForward(self.getPoints(), self.h)
+        points = self.integrator.stepForward(self.getPoints(), self.h, t)
 
         # DfromAB = FiniteDFromAB(self.config)
         # ShafABdB = GradShafranov_ABdB(self.config)
