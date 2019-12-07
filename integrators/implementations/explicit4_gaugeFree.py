@@ -71,6 +71,7 @@ class SymplecticExplicit4_GaugeFree(Integrator):
         file.write("{:.12f} ".format(np.sqrt(points.z1[0]**2 + points.z1[1]**2)))
         for i in range(3):
             file.write("{:.12f} ".format(points.z1[i]))
+        for i in range(3):
             for j in range(3):
                 file.write("{:.12f} ".format(dBhes[i, j]))
         file.write("\n")
