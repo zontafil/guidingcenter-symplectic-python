@@ -64,20 +64,20 @@ class SymplecticExplicit4_GaugeFree(Integrator):
                 B0 = self.system.fieldBuilder.compute(z1m)
                 BHessian[:, j] = 0.5*(B1.Bgrad - B0.Bgrad) / self.config.hx
 
-        file = open("bhes.txt", "a")
-        # print("====")
-        dBhes = ABdB.BHessian - BHessian
-        theta = np.arctan(points.z1[1]/points.z1[0])
-        file.write("{} ".format(t))
-        file.write("{:.12f} ".format(np.sqrt(points.z1[0]**2 + points.z1[1]**2)))
-        file.write("{:.12f} ".format(theta))
-        for i in range(3):
-            file.write("{:.12f} ".format(points.z1[i]))
-        for i in range(3):
-            for j in range(3):
-                file.write("{:.12f} ".format(dBhes[i, j]))
-        file.write("\n")
-        file.close()
+        # file = open("bhes.txt", "a")
+        # # print("====")
+        # dBhes = ABdB.BHessian - BHessian
+        # theta = np.arctan(points.z1[1]/points.z1[0])
+        # file.write("{} ".format(t))
+        # file.write("{:.12f} ".format(np.sqrt(points.z1[0]**2 + points.z1[1]**2)))
+        # file.write("{:.12f} ".format(theta))
+        # for i in range(3):
+        #     file.write("{:.12f} ".format(points.z1[i]))
+        # for i in range(3):
+        #     for j in range(3):
+        #         file.write("{:.12f} ".format(dBhes[i, j]))
+        # file.write("\n")
+        # file.close()
         # print(BHes[0,0])
         # print(BHes_num_fromB[0,0])
         # print("====")
