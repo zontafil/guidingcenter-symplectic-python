@@ -100,7 +100,9 @@ class GradShafranov_ABdB(AB_dB_FieldBuilder):
         x = z[:3]
         r = np.sqrt(x[0]**2 + x[1]**2)
         u = z[3]
-        theta = np.arctan(x[1]/x[0])
+        # theta = np.arctan(x[1]/x[0])
+        sintheta = x[1] / r
+        costheta = x[0] / r
 
         BdB = self.B_dB_cyl(r, x[2])
         Bcyl = np.array([BdB[0], BdB[1], BdB[2]])
@@ -173,12 +175,12 @@ class GradShafranov_ABdB(AB_dB_FieldBuilder):
         Bdag = B + u * Bcurl / Bnorm + u * np.cross(grad1_B, B)
 
         # compute Bjac
-        dBx_dr = BdB[3] * np.cos(theta) - BdB[6] * np.sin(theta)
-        dBx_dp = - BdB[0] * np.sin(theta) / r - BdB[1] * np.cos(theta) / r
-        dBx_dz = BdB[5] * np.cos(theta) - BdB[8] * np.sin(theta) / r
-        dBy_dr = BdB[3] * np.sin(theta) + BdB[6] * np.cos(theta)
-        dBy_dp = + BdB[0] * np.cos(theta) / r - BdB[1] * np.sin(theta) / r
-        dBy_dz = BdB[5] * np.sin(theta) + BdB[8] * np.cos(theta) / r
+        dBx_dr = BdB[3] * costheta - BdB[6] * sintheta
+        dBx_dp = - BdB[0] * sintheta / r - BdB[1] * costheta / r
+        dBx_dz = BdB[5] * costheta - BdB[8] * sintheta / r
+        dBy_dr = BdB[3] * sintheta + BdB[6] * costheta
+        dBy_dp = + BdB[0] * costheta / r - BdB[1] * sintheta / r
+        dBy_dz = BdB[5] * sintheta + BdB[8] * costheta / r
         dBz_dr = BdB[9]
         dBz_dp = 0
         dBz_dz = BdB[11]
@@ -227,10 +229,10 @@ class GradShafranov_ABdB(AB_dB_FieldBuilder):
         d2modB_dRdz /= Bnorm
         d2modB_d2z /= Bnorm
 
-        gradCyl_dmodB_dx = np.array([d2modB_d2R * np.cos(theta), -gradB_cyl[0] * np.sin(theta) / r,
-                                    d2modB_dRdz * np.cos(theta)])
-        gradCyl_dmodB_dy = np.array([d2modB_d2R * np.sin(theta), gradB_cyl[0] * np.cos(theta) / r,
-                                    d2modB_dRdz * np.sin(theta)])
+        gradCyl_dmodB_dx = np.array([d2modB_d2R * costheta, -gradB_cyl[0] * sintheta / r,
+                                    d2modB_dRdz * costheta])
+        gradCyl_dmodB_dy = np.array([d2modB_d2R * sintheta, gradB_cyl[0] * costheta / r,
+                                    d2modB_dRdz * sintheta])
         gradCyl_dmodB_dz = np.array([d2modB_dRdz, 0, d2modB_d2z])
 
         BHessian = np.zeros([3, 3])
