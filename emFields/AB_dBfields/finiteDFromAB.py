@@ -75,6 +75,4 @@ class FiniteDFromAB(AB_dB_FieldBuilder):
         BHessian = self.B_Hessian(x)
 
         return ABdBGuidingCenter(A=A, Adag_jac=Adag_jac, Adag=Adag, B=B,
-                                 Bgrad=B_grad, b=b, Bnorm=Bnorm, BHessian=BHessian, Bdag=Bdag,
-                                 d2modB_d2R=None, d2modB_dRdz=None, d2modB_d2z=None, gradB_cyl=None,
-                                 gradCyl_dmodB_dx=None, gradCyl_dmodB_dy=None, gradCyl_dmodB_dz=None)
+                                 Bgrad=B_grad, b=b, Bnorm=Bnorm, BHessian=BHessian, Bdag=Bdag)
