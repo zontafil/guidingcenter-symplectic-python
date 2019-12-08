@@ -33,8 +33,8 @@ class SymplecticExplicit4_GaugeFree(Integrator):
         z1 = points.z1
         z0 = points.z0
         ABdB = self.system.fieldBuilder.compute(z1)
-        BHessian = np.zeros([3, 3])
-        # BHessian = np.array(ABdB.BHessian)
+        # BHessian = np.zeros([3, 3])
+        BHessian = np.array(ABdB.BHessian)
 
         # Bgrad = self.Bgradnum(z1)
 
