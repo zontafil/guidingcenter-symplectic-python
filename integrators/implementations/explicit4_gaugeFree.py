@@ -7,13 +7,63 @@ class SymplecticExplicit4_GaugeFree(Integrator):
     def __init__(self, config):
         super().__init__(config)
         self.mu = self.config.mu
+        # file = open("bhes.txt", "w+")
+        # file.close()
 
-    def stepForward(self, points, h):
+    def stepForward(self, points, h, t):
         z1 = points.z1
         z0 = points.z0
         ABdB = self.system.fieldBuilder.compute(z1)
         # BHessian = np.zeros([3, 3])
-        BHessian = ABdB.BHessian
+        BHessian = np.array(ABdB.BHessian)
+
+        # DEBUG - REMOVE WHEN EVERYTHING OK
+        # if self.config.BHessian_num_4:
+        #     for j in range(3):
+        #         z1p1 = np.array(z1)
+        #         z1m1 = np.array(z1)
+        #         z1p2 = np.array(z1)
+        #         z1m2 = np.array(z1)
+        #         z1m1[j] -= self.config.hx
+        #         z1p1[j] += self.config.hx
+        #         z1m2[j] -= 2 * self.config.hx
+        #         z1p2[j] += 2 * self.config.hx
+        #         Bp1 = self.system.fieldBuilder.compute(z1p1)
+        #         Bp2 = self.system.fieldBuilder.compute(z1p2)
+        #         Bm1 = self.system.fieldBuilder.compute(z1m1)
+        #         Bm2 = self.system.fieldBuilder.compute(z1m2)
+        #         BHessian[:, j] = (1/12 * Bm2.Bgrad - 2/3 * Bm1.Bgrad +
+        #                           2/3 * Bp1.Bgrad - 1/12 * Bp2.Bgrad) / self.config.hx
+
+        # if self.config.BHessian_num:
+        #     for j in range(3):
+        #         z1p = np.array(z1)
+        #         z1m = np.array(z1)
+        #         z1m[j] -= self.config.hx
+        #         z1p[j] += self.config.hx
+        #         B1 = self.system.fieldBuilder.compute(z1p)
+        #         B0 = self.system.fieldBuilder.compute(z1m)
+        #         BHessian[:, j] = 0.5*(B1.Bgrad - B0.Bgrad) / self.config.hx
+
+        # file = open("bhes.txt", "a")
+        # # print("====")
+        # dBhes = ABdB.BHessian - BHessian
+        # theta = np.arctan(points.z1[1]/points.z1[0])
+        # file.write("{} ".format(t))
+        # file.write("{:.12f} ".format(np.sqrt(points.z1[0]**2 + points.z1[1]**2)))
+        # file.write("{:.12f} ".format(theta))
+        # for i in range(3):
+        #     file.write("{:.12f} ".format(points.z1[i]))
+        # for i in range(3):
+        #     for j in range(3):
+        #         file.write("{:.12f} ".format(dBhes[i, j]))
+        # file.write("\n")
+        # file.close()
+        # print(BHes[0,0])
+        # print(BHes_num_fromB[0,0])
+        # print("====")
+        # print(ABdB.Bgrad[0])
+        # print(Bgrad[0])
 
         # build omega1
         omega1 = np.zeros([4, 4])

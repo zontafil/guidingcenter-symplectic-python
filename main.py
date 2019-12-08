@@ -32,7 +32,7 @@ for t in range(2, config.nsteps):
     if (t % config.printTimestepMult) == 0:
         print("Timestep " + str(t))
 
-    particle.stepForward()
+    particle.stepForward(t)
 
     # PRINT TO FILE
     if (t % config.fileTimestepMult) == 0:
