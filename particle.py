@@ -27,7 +27,7 @@ class Particle:
 
     def stepForward(self, t):
         # compute next time step
-        points = self.integrator.stepForward(self.getPoints(), self.h, t)
+        points = self.integrator.stepForward(self.getPoints(), self.h)
 
         # DfromAB = FiniteDFromAB(self.config)
         # ShafABdB = GradShafranov_ABdB(self.config)

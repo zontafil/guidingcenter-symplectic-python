@@ -9,7 +9,7 @@ class SymplecticExplicit4_GaugeFree(Integrator):
         self.mu = self.config.mu
         # self.file = open("bhes.txt", "w+")
 
-    def stepForward(self, points, h, t):
+    def stepForward(self, points, h):
         z1 = points.z1
         z0 = points.z0
         ABdB = self.system.fieldBuilder.compute(z1)
