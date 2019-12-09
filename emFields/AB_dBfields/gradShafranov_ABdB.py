@@ -182,9 +182,4 @@ class GradShafranov_ABdB(AB_dB_FieldBuilder):
         BHessian[2, :] = cyl2cart(gradCyl_dmodB_dz, x)
 
         return ABdBGuidingCenter(Adag_jac=Adag_jac, A=A, Adag=Adag,
-                                 B=B, Bgrad=B_grad, b=b, Bnorm=Bnorm, BHessian=BHessian, Bdag=Bdag,
-                                 d2modB_d2R=d2modB_d2R, d2modB_dRdz=d2modB_dRdz, d2modB_d2z=d2modB_d2z,
-                                 gradB_cyl=gradB_cyl,
-                                 gradCyl_dmodB_dx=gradCyl_dmodB_dx,
-                                 gradCyl_dmodB_dy=gradCyl_dmodB_dy,
-                                 gradCyl_dmodB_dz=gradCyl_dmodB_dz)
+                                 B=B, Bgrad=B_grad, b=b, Bnorm=Bnorm, BHessian=BHessian, Bdag=Bdag)
