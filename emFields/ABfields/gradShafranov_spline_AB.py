@@ -19,7 +19,7 @@ class GradShafranovSplineAB(EMField):
         self.B0 = config.B0
         self.R0 = config.R0
 
-        self.eqdsk = EqdskReader(config.eqdskFile)
+        self.eqdsk = EqdskReader(config.eqdskFile, config.psi_degree, config.f_degree)
 
         print("EQDSK: range r: {} {}".format(self.eqdsk.r_min, self.eqdsk.r_max))
         print("EQDSK: range z: {} {}".format(self.eqdsk.z_min, self.eqdsk.z_max))

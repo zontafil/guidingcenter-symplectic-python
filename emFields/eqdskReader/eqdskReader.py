@@ -26,7 +26,7 @@ def read_data(fp):
 
 class EqdskReader():
 
-    def __init__(self, fname):
+    def __init__(self, fname, psi_degree, f_degree):
 
         # open the file for reading
         fp = open(fname, "r")
@@ -123,9 +123,9 @@ class EqdskReader():
         Rs = np.linspace(self.rleft, self.rleft+self.rdim, self.nr)
         Zs = np.linspace(self.zmid-self.zdim/2.0,
                          self.zmid+self.zdim/2.0, self.nz)
-        self.psi_spl = spl2d(Rs, Zs, self.psirz, kx=4, ky=4)
+        self.psi_spl = spl2d(Rs, Zs, self.psirz, kx=psi_degree, ky=psi_degree)
         psis = np.linspace(self.simag, self.sibry, self.nr)
-        self.fpol_spl = spl1d(psis, self.fpol, k=4)
+        self.fpol_spl = spl1d(psis, self.fpol, k=f_degree)
 
         self.r_min = self.rleft
         self.r_max = self.r_min + self.rdim

@@ -14,7 +14,7 @@ def cyl2cart(v, x):
 
 class GradShafranov_ABdB(AB_dB_FieldBuilder):
     def __init__(self, config):
-        self.eqdsk = EqdskReader(config.eqdskFile)
+        self.eqdsk = EqdskReader(config.eqdskFile, config.psi_degree, config.f_degree)
         self.R0 = config.R0
         self.hx = config.hx
 
