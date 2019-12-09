@@ -7,8 +7,7 @@ class SymplecticExplicit4_GaugeFree(Integrator):
     def __init__(self, config):
         super().__init__(config)
         self.mu = self.config.mu
-        # file = open("bhes.txt", "w+")
-        # file.close()
+        # self.file = open("bhes.txt", "w+")
 
     def stepForward(self, points, h, t):
         z1 = points.z1
@@ -46,24 +45,18 @@ class SymplecticExplicit4_GaugeFree(Integrator):
         #         BHessian[:, j] = 0.5*(B1.Bgrad - B0.Bgrad) / self.config.hx
 
         # file = open("bhes.txt", "a")
-        # # print("====")
+        # print("====")
         # dBhes = ABdB.BHessian - BHessian
         # theta = np.arctan(points.z1[1]/points.z1[0])
-        # file.write("{} ".format(t))
-        # file.write("{:.12f} ".format(np.sqrt(points.z1[0]**2 + points.z1[1]**2)))
-        # file.write("{:.12f} ".format(theta))
+        # self.file.write("{} ".format(t))
+        # self.file.write("{:.12f} ".format(np.sqrt(points.z1[0]**2 + points.z1[1]**2)))
+        # self.file.write("{:.12f} ".format(theta))
         # for i in range(3):
-        #     file.write("{:.12f} ".format(points.z1[i]))
+        #     self.file.write("{:.12f} ".format(points.z1[i]))
         # for i in range(3):
         #     for j in range(3):
-        #         file.write("{:.12f} ".format(dBhes[i, j]))
-        # file.write("\n")
-        # file.close()
-        # print(BHes[0,0])
-        # print(BHes_num_fromB[0,0])
-        # print("====")
-        # print(ABdB.Bgrad[0])
-        # print(Bgrad[0])
+        #         self.file.write("{:.12f} ".format(BHessian[i, j]))
+        # self.file.write("\n")
 
         # build omega1
         omega1 = np.zeros([4, 4])
