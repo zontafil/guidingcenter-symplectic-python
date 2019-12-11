@@ -87,7 +87,8 @@ class SplineField_BdB(AB_dB_FieldBuilder):
     def compute(self, z):
         x = z[:3]
         r = np.sqrt(x[0]**2 + x[1]**2)
-        theta = np.arctan(x[1]/x[0])
+        costheta = x[0] / r
+        sintheta = x[1] / r
         BdB = self.B_dB_cyl(r, x[2])
 
         Bcyl = np.array([BdB[0], BdB[1], BdB[2]])
@@ -127,10 +128,10 @@ class SplineField_BdB(AB_dB_FieldBuilder):
         d2modB_dRdz /= Bnorm
         d2modB_d2z /= Bnorm
 
-        gradCyl_dmodB_dx = np.array([d2modB_d2R * np.cos(theta), -gradB_cyl[0] * np.sin(theta) / r,
-                                    d2modB_dRdz * np.cos(theta)])
-        gradCyl_dmodB_dy = np.array([d2modB_d2R * np.sin(theta), gradB_cyl[0] * np.cos(theta) / r,
-                                    d2modB_dRdz * np.sin(theta)])
+        gradCyl_dmodB_dx = np.array([d2modB_d2R * costheta, -gradB_cyl[0] * sintheta / r,
+                                    d2modB_dRdz * costheta])
+        gradCyl_dmodB_dy = np.array([d2modB_d2R * sintheta, gradB_cyl[0] * costheta / r,
+                                    d2modB_dRdz * sintheta])
         gradCyl_dmodB_dz = np.array([d2modB_dRdz, 0, d2modB_d2z])
 
         BHessian = np.zeros([3, 3])
