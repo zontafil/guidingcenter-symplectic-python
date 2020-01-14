@@ -5,6 +5,7 @@
 #  rk = integratorFactory("RK4", config)
 from integrators.implementations.rk4 import RK4
 from integrators.implementations.explicit4_gaugeFree import SymplecticExplicit4_GaugeFree
+from integrators.implementations.explicit4_thirdOrder import SymplecticExplicit4_ThirdOrder
 from integrators.implementations.explicit3 import SymplecticExplicit3
 from integrators.implementations.explicit3_gaugeFree import SymplecticExplicit3GaugeFree
 from integrators.implementations.explicit4 import SymplecticExplicit4
@@ -38,6 +39,8 @@ def integratorFactory(integratorName, config):
     #     return SemiexplicitQinReg(config)
     elif integratorName == "SymplecticExplicit4_GaugeInvariant":
         return SymplecticExplicit4_GaugeFree(config)
+    elif integratorName == "SymplecticExplicit4_ThirdOrder":
+        return SymplecticExplicit4_ThirdOrder(config)
     # elif integratorName == "SymplecticExplicit3_GaugeInvariant":
     #     return SymplecticExplicit3_GaugeFree(config)
 
