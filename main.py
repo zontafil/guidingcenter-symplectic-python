@@ -22,6 +22,7 @@ print("Initialization: ")
 print("z_init: " + str(particle.z0))
 print("z0: " + str(particle.z1))
 
+out.write("t dE1 x1 y1 z1 u1 r1 px1 py1 pz1 pu1\n")
 printToFile(0, config, particle, out)
 
 #  ******
