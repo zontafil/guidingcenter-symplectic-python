@@ -9,9 +9,12 @@ class SymplecticExplicit4_ThirdOrder(ImplicitIntegrator):
 
     def f(self, z0, z1, z2, h):
 
+        dz1 = z2 - z1
+        dz0 = z1 - z0
+
         ABdB = self.system.fieldBuilder.compute(z1)
         BHessian = np.array(ABdB.BHessian)
-        # d2B = ABdB.d2B
+        d3B = self.system.fieldBuilder.d3B(z1)
 
         # build omega1
         omega1 = np.zeros([4, 4])
@@ -36,11 +39,15 @@ class SymplecticExplicit4_ThirdOrder(ImplicitIntegrator):
         Hd2[:3, :3] = self.mu*BHessian
         Hd2[3, 3] = 1.
 
-        # Hd3 = np.zeros([4, 4, 4])
-        # Hd3[:3, :3, :3] = self.mu * d2B
+        Hd3 = np.zeros([4, 4, 4])
+        Hd3[:3, :3, :3] = self.mu * d3B
 
         ret = 0.5 * np.dot(omega1, z2 - z0)
         ret += h * Hd1
         ret += h / 4 * np.dot(Hd2, z2 - 2 * z1 + z0)
+
+        # third order hamiltonian terms
+        ret += h / 32 * np.dot(dz1, np.dot(dz1, Hd3))
+        ret -= h / 32 * np.dot(dz0, np.dot(dz0, Hd3))
 
         return ret

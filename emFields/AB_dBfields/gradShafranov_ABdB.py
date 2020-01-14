@@ -96,6 +96,38 @@ class GradShafranov_ABdB(AB_dB_FieldBuilder):
         Ajac[2, :] = cyl2cart(np.array([dAz_dr, dAz_dp, dAz_dz]), x)
         return [A, Ajac]
 
+    """Compute the third derivative of the magnetic field at the given 4D position
+
+    Returns:
+        [numpy.array([3, 3, 3])]
+    """
+    def d3B(self, z):
+        ret = np.zeros([3, 3, 3])
+
+        for i in range(3):
+            # print("i " + str(i))
+            z1 = np.array(z)
+            z0 = np.array(z)
+            z1[i] += self.hx
+            z0[i] -= self.hx
+            BdB1 = self.compute(z1)
+            BdB0 = self.compute(z0)
+            for j in range(3):
+                for k in range(3):
+                    ret[i, j, k] = 0.5 * (BdB1.BHessian[j, k] - BdB0.BHessian[j, k]) / self.hx
+
+        # print("\n\n===== D3B")
+        # print(ret)
+        # # print(ret[1,0,0])
+        # # print(ret[0,1,0])
+        # print("=====\n\n")
+        return ret
+
+    """Compute the magnetic field and first and second derivatives at the given 4D position
+
+    Returns:
+        [ABdBGuidingCenter]
+    """
     def compute(self, z):
         x = z[:3]
         r = np.sqrt(x[0]**2 + x[1]**2)
@@ -180,6 +212,10 @@ class GradShafranov_ABdB(AB_dB_FieldBuilder):
         BHessian[0, :] = cyl2cart(gradCyl_dmodB_dx, x)
         BHessian[1, :] = cyl2cart(gradCyl_dmodB_dy, x)
         BHessian[2, :] = cyl2cart(gradCyl_dmodB_dz, x)
+
+        # print("\n\n===== Bhessian")
+        # print(BHessian)
+        # print("=====\n\n")
 
         return ABdBGuidingCenter(Adag_jac=Adag_jac, A=A, Adag=Adag,
                                  B=B, Bgrad=B_grad, b=b, Bnorm=Bnorm, BHessian=BHessian, Bdag=Bdag)
