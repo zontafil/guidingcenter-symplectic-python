@@ -47,7 +47,7 @@ class SymplecticExplicit4_ThirdOrder(ImplicitIntegrator):
         ret += h / 4 * np.dot(Hd2, z2 - 2 * z1 + z0)
 
         # third order hamiltonian terms
-        ret += h / 32 * np.dot(dz1, np.dot(dz1, Hd3))
-        ret -= h / 32 * np.dot(dz0, np.dot(dz0, Hd3))
+        ret += h / 16 * np.dot(dz1, np.dot(dz1, Hd3))
+        ret += h / 16 * np.dot(dz0, np.dot(dz0, Hd3))
 
         return ret
