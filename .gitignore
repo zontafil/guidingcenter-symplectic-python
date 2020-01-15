@@ -3,3 +3,4 @@ out*
 config.py
 *.pyc
 *.swp
+.vscode/.ropeproject/objectdb
