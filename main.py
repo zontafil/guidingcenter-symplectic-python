@@ -10,9 +10,6 @@ def printToFile(t, config, particle, out):
 # configuration
 config = Config()
 
-# open output file
-out = open(config.outFile, "w+")
-
 # create a particle
 particle = Particle(config)
 particle.initialize()
@@ -22,8 +19,12 @@ print("Initialization: ")
 print("z_init: " + str(particle.z0))
 print("z0: " + str(particle.z1))
 
+# open output file
+out = open(config.outFile, "w+")
 out.write("t dE1 x1 y1 z1 u1 r1 px1 py1 pz1 pu1\n")
 printToFile(0, config, particle, out)
+out.close()
+out = open(config.outFile, "a+")
 
 #  ******
 # MAIN LOOP
