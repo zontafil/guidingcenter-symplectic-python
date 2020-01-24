@@ -28,7 +28,7 @@ printToFile(0, config, particle, out)
 #  ******
 # MAIN LOOP
 #  ******
-for t in range(2, config.nsteps):
+for t in range(1, config.nsteps):
     # PRINT TO SCREEN EVERY N STEPS
     if (t % config.printTimestepMult) == 0:
         print("Timestep " + str(t))
