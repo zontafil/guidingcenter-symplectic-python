@@ -10,6 +10,7 @@ class InitializationType(Enum):
     MANUAL = 0
     LAGRANGIAN = 1
     HAMILTONIAN = 2
+    MANUAL_Z0Z1 = 3
 
 
 class Particle:
@@ -131,6 +132,11 @@ class Particle:
             else:
                 self.z1 = np.array(self.z0)
                 self.p1 = np.array(self.p0)
+        elif init == InitializationType.MANUAL_Z0Z1:
+            if hasattr(self.integrator.__class__, "legendreLeft"):
+                self.p0 = self.integrator.legendreLeft(self.z0, self.z1, self.h)
+            if hasattr(self.integrator.__class__, "legendreRight"):
+                self.p1 = self.integrator.legendreRight(self.z0, self.z1, self.h)
 
         # compute initial energy
         self.Einit = self.integrator.system.hamiltonian(self.z0)
