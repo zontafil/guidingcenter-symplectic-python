@@ -2,8 +2,7 @@ from enum import Enum
 from integrators.integratorFactory import integratorFactory
 from particleUtils import z0z1p0p1
 import numpy as np
-# from emFields.AB_dBfields.finiteDFromAB import FiniteDFromAB
-# from emFields.AB_dBfields.gradShafranov_ABdB import GradShafranov_ABdB
+from systems.systemFactory import systemFactory
 
 
 class InitializationType(Enum):
@@ -18,6 +17,10 @@ class Particle:
         self.config = config
         self.integrator = integratorFactory(config.integrator, config)
         self.h = config.h
+        if config.debugBfield:
+            self.system = systemFactory(config.system, config)
+            self.Bout = open("./Bdebug.txt", "w+")
+            self.Bout.write("t Ax Ay Az Bx By Bz\n")
 
     def r1(self):
         return np.sqrt(self.z1[0]**2 + self.z1[1]**2)
@@ -38,8 +41,11 @@ class Particle:
         self.z1 = points.z2
         self.p1 = points.p2
 
-        field = self.system.fieldBuilder.compute(points.z2)
-        self.Bout.write("{} {} {} {} {} {} {}\n".format(t, field.A[0], field.A[1], field.A[2], field.B[0], field.B[1], field.B[2]))
+        # print magnetic field along the particle orbit
+        if self.config.debugBfield:
+            field = self.system.fieldBuilder.compute(points.z2)
+            self.Bout.write("{} {} {} {} {} {} {}\n".format(t,
+                            field.A[0], field.A[1], field.A[2], field.B[0], field.B[1], field.B[2]))
 
         # compute conserved quantitiesEerr0
         self.computeEnergyError()
