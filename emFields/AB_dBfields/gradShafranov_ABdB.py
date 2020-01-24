@@ -22,6 +22,19 @@ class GradShafranov_ABdB(AB_dB_FieldBuilder):
         print("EQDSK: range z: {} {}".format(self.eqdsk.z_min, self.eqdsk.z_max))
         print("EQDSK: range psi: {} {}".format(self.eqdsk.simag, self.eqdsk.sibry))
 
+    def B_Hessian_num(self, z):
+        ret = np.zeros([3, 3])
+        for j in range(3):
+            z0 = np.array(z)
+            z1 = np.array(z)
+            z0[j] -= self.hx
+            z1[j] += self.hx
+            field1 = self.compute(z1)
+            field0 = self.compute(z0)
+            ret[:, j] = 0.5*(field1.Bgrad - field0.Bgrad) / self.hx
+
+        return ret
+
     def B_dB_cyl(self, R, Z):
 
         # interpolate psi and derivatives
