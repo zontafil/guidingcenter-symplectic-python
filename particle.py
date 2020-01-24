@@ -80,6 +80,9 @@ class Particle:
         self.z1 = points.z2
         self.p1 = points.p2
 
+        field = self.system.fieldBuilder.compute(points.z2)
+        self.Bout.write("{} {} {} {} {} {} {}\n".format(t, field.A[0], field.A[1], field.A[2], field.B[0], field.B[1], field.B[2]))
+
         # compute conserved quantitiesEerr0
         self.computeEnergyError()
 
