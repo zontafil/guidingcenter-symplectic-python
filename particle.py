@@ -30,49 +30,6 @@ class Particle:
         # compute next time step
         points = self.integrator.stepForward(self.getPoints(), self.h)
 
-        # DfromAB = FiniteDFromAB(self.config)
-        # ShafABdB = GradShafranov_ABdB(self.config)
-        # # print("point {}".format(self.z1))
-        # print(DfromAB.compute(self.z1))
-        # shafBdB = ShafABdB.compute(self.z1)
-        # print(shafBdB)
-
-        # r = np.sqrt(self.z1[0]**2 + self.z1[1]**2)
-        # z = self.z1[2]
-        # theta = np.arctan(self.z1[1]/self.z1[0])
-        # r1 = r + self.config.hx
-        # r0 = r - self.config.hx
-        # z1 = z + self.config.hx
-        # z0 = z - self.config.hx
-        # theta1 = theta + self.config.hx
-        # theta0 = theta - self.config.hx
-
-        # zr1 = np.array([r1*np.cos(theta), r1*np.sin(theta), self.z1[2], self.z1[3]])
-        # zr0 = np.array([r0*np.cos(theta), r0*np.sin(theta), self.z1[2], self.z1[3]])
-        # zz1 = np.array([r*np.cos(theta), r*np.sin(theta), z1, self.z1[3]])
-        # zz0 = np.array([r*np.cos(theta), r*np.sin(theta), z0, self.z1[3]])
-        # zp1 = np.array([r*np.cos(theta1), r*np.sin(theta1), z, self.z1[3]])
-        # zp0 = np.array([r*np.cos(theta0), r*np.sin(theta0), z, self.z1[3]])
-        # shafr1 = ShafABdB.compute(zr1)
-        # shafr0 = ShafABdB.compute(zr0)
-        # shafz1 = ShafABdB.compute(zz1)
-        # shafz0 = ShafABdB.compute(zz0)
-        # shafp1 = ShafABdB.compute(zp1)
-        # shafp0 = ShafABdB.compute(zp0)
-        # # TODO: add gradient_cyl_modB to collections
-        # # d2modB_d2R = 0.5 * (shafr1.gradB_cyl[0] - shafr0.gradB_cyl[0]) / self.config.hx - shafBdB.d2modB_d2R
-        # # d2modB_dRdz = 0.5 * (shafz1.gradB_cyl[0] - shafz0.gradB_cyl[0]) / self.config.hx - shafBdB.d2modB_dRdz
-        # # d2modB_d2z = 0.5 * (shafz1.gradB_cyl[2] - shafz0.gradB_cyl[2]) / self.config.hx - shafBdB.d2modB_d2z
-        # d2modB_dxdr = 0.5 * (shafr1.Bgrad[0] - shafr0.Bgrad[0]) / self.config.hx - shafBdB.gradCyl_dmodB_dx[0]
-        # d2modB_dxdp = 0.5 * (shafp1.Bgrad[0] - shafp0.Bgrad[0]) / r / self.config.hx - shafBdB.gradCyl_dmodB_dx[1]
-        # d2modB_dxdz = 0.5 * (shafz1.Bgrad[0] - shafz0.Bgrad[0]) / self.config.hx - shafBdB.gradCyl_dmodB_dx[2]
-        # d2modB_dydr = 0.5 * (shafr1.Bgrad[1] - shafr0.Bgrad[1]) / self.config.hx - shafBdB.gradCyl_dmodB_dy[0]
-        # d2modB_dydp = 0.5 * (shafp1.Bgrad[1] - shafp0.Bgrad[1]) / r / self.config.hx - shafBdB.gradCyl_dmodB_dy[1]
-        # d2modB_dydz = 0.5 * (shafz1.Bgrad[1] - shafz0.Bgrad[1]) / self.config.hx - shafBdB.gradCyl_dmodB_dy[2]
-        # d2modB_dzdr = 0.5 * (shafr1.Bgrad[2] - shafr0.Bgrad[2]) / self.config.hx - shafBdB.gradCyl_dmodB_dz[0]
-        # d2modB_dzdp = 0.5 * (shafp1.Bgrad[2] - shafp0.Bgrad[2]) / r / self.config.hx - shafBdB.gradCyl_dmodB_dz[1]
-        # d2modB_dzdz = 0.5 * (shafz1.Bgrad[2] - shafz0.Bgrad[2]) / self.config.hx - shafBdB.gradCyl_dmodB_dz[2]
-
         # shift values
         self.z0 = self.z1
         self.p0 = self.p1
