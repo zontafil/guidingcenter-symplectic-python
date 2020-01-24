@@ -71,7 +71,8 @@ class GradShafranov_ABdB(AB_dB_FieldBuilder):
     def A(self, x):
         r = np.sqrt(x[0]**2 + x[1]**2)
         z = x[2]
-        theta = np.arctan(x[1]/x[0])
+        sintheta = x[1] / r
+        costheta = x[0] / r
 
         psi = self.eqdsk.psi_spl(x=r, y=z)[0][0]
         dpsi_dR = self.eqdsk.psi_spl(x=r, y=z, dx=1, dy=0, grid=True)[0][0]
@@ -81,12 +82,12 @@ class GradShafranov_ABdB(AB_dB_FieldBuilder):
         A = cyl2cart(Acyl, x)
 
         # compute Ajac
-        dAx_dr = psi / r**2 * np.sin(theta) - dpsi_dR / r * np.sin(theta)
-        dAx_dp = - psi / r**2 * np.cos(theta)
-        dAx_dz = - dpsi_dz / r * np.sin(theta)
-        dAy_dr = - psi / r**2 * np.cos(theta) + dpsi_dR / r * np.cos(theta)
-        dAy_dp = - psi / r**2 * np.sin(theta)
-        dAy_dz = dpsi_dz / r * np.cos(theta)
+        dAx_dr = psi / r**2 * sintheta - dpsi_dR / r * sintheta
+        dAx_dp = - psi / r**2 * costheta
+        dAx_dz = - dpsi_dz / r * sintheta
+        dAy_dr = - psi / r**2 * costheta + dpsi_dR / r * costheta
+        dAy_dp = - psi / r**2 * sintheta
+        dAy_dz = dpsi_dz / r * costheta
         dAz_dr = 1 / r
         dAz_dp = 0
         dAz_dz = 0
