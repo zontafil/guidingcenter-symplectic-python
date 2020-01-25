@@ -4,7 +4,7 @@ from particle import Particle
 
 def printToFile(t, config, particle, out):
     z1 = ' '.join(map(str, particle.z1))
-    out.write("{} {} {} {}\n".format(t, particle.dE1, z1, particle.r1(), particle.p1))
+    out.write("{} {} {} {} {}\n".format(t, t / config.stepsPerOrbit, particle.dE1, z1, particle.r1(), particle.p1))
 
 
 # configuration
@@ -21,7 +21,7 @@ print("z0: " + str(particle.z1))
 
 # open output file
 out = open(config.outFile, "w+")
-out.write("t dE1 x1 y1 z1 u1 r1 px1 py1 pz1 pu1\n")
+out.write("t norbit dE1 x1 y1 z1 u1 r1 px1 py1 pz1 pu1\n")
 printToFile(0, config, particle, out)
 out.close()
 out = open(config.outFile, "a+")
