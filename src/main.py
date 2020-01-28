@@ -1,18 +1,8 @@
 from config import Config
 from particle import Particle
+from particleUtils import printToFile
 import sys
 import getopt
-
-
-def printToFile(t, config, particle, out, timestep0=False):
-    if timestep0 == True:
-        z0 = ' '.join(map(str, particle.z0))
-        p0 = ' '.join(map(str, particle.p0))
-        out.write("{} {} {} {} {} {}\n".format(t, t / config.stepsPerOrbit, particle.dE0, z0, particle.r0(), p0))
-    else:
-        z1 = ' '.join(map(str, particle.z1))
-        p1 = ' '.join(map(str, particle.p1))
-        out.write("{} {} {} {} {} {}\n".format(t, t / config.stepsPerOrbit, particle.dE1, z1, particle.r1(), p1))
 
 
 # configuration
@@ -43,7 +33,7 @@ print("z0: " + str(particle.z1))
 
 # open output file
 out = open(outFile, "w+")
-out.write("t norbit dE1 x1 y1 z1 u1 r1 px1 py1 pz1 pu1\n")
+out.write("t norbit dE1 x1 y1 z1 u1 r1 px1 py1 pz1 pu1 Adag_phi\n")
 printToFile(0, config, particle, out, timestep0=True)
 printToFile(1, config, particle, out)
 out.close()
