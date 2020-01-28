@@ -2,24 +2,34 @@
 DATE=$(date +"%Y-%m-%d_%H:%M:%S")
 SIM_PREFIX="sims"
 GITTOKEN=$(git rev-parse HEAD | cut -c1-10)
-FOLDERPREFIX=$SIM_PREFIX/"$DATE"_$GITTOKEN
+SIM_FOLDER="$DATE"_$GITTOKEN
+FOLDERPREFIX=$SIM_PREFIX/"$SIM_FOLDER"
 
 mkdir -p $FOLDERPREFIX/out
 mkdir -p $FOLDERPREFIX/src
 mkdir -p $FOLDERPREFIX/plots
 mkdir -p plots
+mkdir -p out
 
 echo "=== Starting simulation: saving to $FOLDERPREFIX"
-
 echo "begin simulation "$DATE > $FOLDERPREFIX/info.txt
 python3 src/main.py -o $FOLDERPREFIX/out/out.txt | tee $FOLDERPREFIX/info.txt
 echo "end simulation "$(date +"%Y-%m-%d_%H:%M:%S") >> $FOLDERPREFIX/info.txt
-
 echo "=== End simulation"
-echo "=== Saving charts"
+
+echo "Creating symbolic link of data and charts"
+cd out
+rm out.txt
+ln -s ../"$FOLDERPREFIX"/out/out.txt .
+cd ..
+cd $SIM_PREFIX
+rm last
+ln -s $SIM_FOLDER last
+cd ..
 
 # save plots
-python3 src/plot.py --oshort=$FOLDERPREFIX/plots/ --olong=plots/"$DATE"_
+echo "=== Saving charts"
+python3 src/plot.py --oshort=$FOLDERPREFIX/plots/ --olong=plots/"$DATE"_ -i out/out.txt
 
 # if [ -f "Blines.txt" ]
 # then
