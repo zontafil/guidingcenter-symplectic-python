@@ -32,6 +32,8 @@ class Particle:
 
     def r1(self):
         return np.sqrt(self.z1[0]**2 + self.z1[1]**2)
+    def r0(self):
+        return np.sqrt(self.z0[0]**2 + self.z0[1]**2)
 
     def computeEnergyError(self):
         self.E1 = self.integrator.system.hamiltonian(self.z1)
