@@ -22,8 +22,8 @@ class Particle:
         # init particle initial conditions
         self.z1 = z1
         self.z0 = z0
-        self.p1 = p1
-        self.p0 = p0
+        self.p1 = p1 if p1 is not None else np.zeros(4)
+        self.p0 = p0 if p0 is not None else np.zeros(4)
 
         if config.debugBfield:
             self.system = systemFactory(config.system, config)
@@ -47,7 +47,7 @@ class Particle:
         self.dE0 = self.dE1
         self.E0 = self.E1
         self.z1 = points.z2
-        self.p1 = points.p2
+        self.p1 = points.p2 if points.p2 is not None else np.zeros(4)
 
         # print magnetic field along the particle orbit
         if self.config.debugBfield:
