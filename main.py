@@ -11,8 +11,10 @@ def printToFile(t, config, particle, out):
 config = Config()
 
 # create a particle
-particle = Particle(config)
-particle.initialize()
+particle = Particle(config, config.z0, config.p0, config.z1, config.p1)
+particle.initialize(config.initializationType)
+for i in range(config.initBackwardIterations):
+    particle.backwardInitializationIteration(config.initBackWardOrder)
 
 print("time step: ", config.h)
 print("Initialization: ")

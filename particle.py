@@ -3,6 +3,7 @@ from integrators.integratorFactory import integratorFactory
 from particleUtils import z0z1p0p1
 import numpy as np
 from systems.systemFactory import systemFactory
+from scipy.interpolate import KroghInterpolator
 
 
 class InitializationType(Enum):
@@ -13,10 +14,17 @@ class InitializationType(Enum):
 
 
 class Particle:
-    def __init__(self, config):
+    def __init__(self, config, z0, p0, z1, p1):
         self.config = config
         self.integrator = integratorFactory(config.integrator, config)
         self.h = config.h
+
+        # init particle initial conditions
+        self.z1 = z1
+        self.z0 = z0
+        self.p1 = p1
+        self.p0 = p0
+
         if config.debugBfield:
             self.system = systemFactory(config.system, config)
             self.Bout = open("./Bdebug.txt", "w+")
@@ -50,16 +58,10 @@ class Particle:
         # compute conserved quantitiesEerr0
         self.computeEnergyError()
 
-    def initialize(self):
-
-        self.z1 = self.config.z1
-        self.z0 = self.config.z0
-        self.p1 = self.config.p1
-        self.p0 = self.config.p0
+    def initialize(self, init_type):
 
         # initialize the particle
-        init = self.config.initializationType
-        if init == InitializationType.LAGRANGIAN:
+        if init_type == InitializationType.LAGRANGIAN:
             # initialize the particle with the help of an auxiliary integrator,
             # in case of the initial conditions are not sufficient for the discrete problem.
             # see PDF, paragraph 6.3
@@ -78,11 +80,11 @@ class Particle:
             if hasattr(self.integrator.__class__, "legendreRight"):
                 self.p1 = self.integrator.legendreRight(self.z0, self.z1, self.h)
 
-        elif init == InitializationType.MANUAL:
+        elif init_type == InitializationType.MANUAL:
             self.z1 = self.z0
             self.p1 = self.p0
 
-        elif init == InitializationType.HAMILTONIAN:
+        elif init_type == InitializationType.HAMILTONIAN:
             # initialize by imposing the continuous momenta to the discrete space
             self.p0 = self.integrator.system.momentum(self.z0)
 
@@ -95,7 +97,7 @@ class Particle:
             else:
                 self.z1 = np.array(self.z0)
                 self.p1 = np.array(self.p0)
-        elif init == InitializationType.MANUAL_Z0Z1:
+        elif init_type == InitializationType.MANUAL_Z0Z1:
             if hasattr(self.integrator.__class__, "legendreLeft"):
                 self.p0 = self.integrator.legendreLeft(self.z0, self.z1, self.h)
             if hasattr(self.integrator.__class__, "legendreRight"):
@@ -103,6 +105,34 @@ class Particle:
 
         # compute initial energy
         self.Einit = self.integrator.system.hamiltonian(self.z0)
+        self.computeEnergyError()
+
+    """Initialize decreasing even-odd splitting by interpolating even N steps
+    This is one iteration that is suppose to converge after 2-4 iterations
+    To be used with a first auxiliary initialization
+    """
+    def backwardInitializationIteration(self, order):
+        even_points = np.zeros([order, 4])
+        ts = np.zeros(order)
+        for i in range(order):
+            ts[i] = i * 2
+        even_points[0, :] = np.array(self.z0)
+        for i in range(order * 2 - 2):
+            self.stepForward(self.h)
+            if i % 2 == 0:
+                even_points[int(i / 2) + 1, :] = np.array(self.z1)
+
+        for i in range(4):
+            interp = KroghInterpolator(ts, even_points[:, i])
+            self.z1[i] = interp(1)
+
+        self.z0 = np.array(even_points[0, :])
+
+        if hasattr(self.integrator.__class__, "legendreLeft"):
+            self.p0 = self.integrator.legendreLeft(self.z0, self.z1, self.h)
+        if hasattr(self.integrator.__class__, "legendreRight"):
+            self.p1 = self.integrator.legendreRight(self.z0, self.z1, self.h)
+
         self.computeEnergyError()
 
     def getPoints(self):
