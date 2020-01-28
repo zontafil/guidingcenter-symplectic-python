@@ -8,14 +8,14 @@
             "name": "main.py",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/main.py",
+            "program": "${workspaceFolder}/src/main.py",
             "console": "integratedTerminal"
         },
         {
             "name": "plot.py",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/plot.py",
+            "program": "${workspaceFolder}/src/plot.py",
             "console": "integratedTerminal"
         }
     ]
