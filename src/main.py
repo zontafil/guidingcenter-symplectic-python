@@ -1,5 +1,7 @@
 from config import Config
 from particle import Particle
+import sys
+import getopt
 
 
 def printToFile(t, config, particle, out, timestep0=False):
@@ -16,24 +18,36 @@ def printToFile(t, config, particle, out, timestep0=False):
 # configuration
 config = Config()
 
+# parse command line
+outFile = config.outFile
+try:
+    opts, args = getopt.getopt(sys.argv[1:], "o:")
+except getopt.GetoptError:
+    print("Usage python3 main.py -o outFile")
+    sys.exit(2)
+for opt, arg in opts:
+    if opt == "-o":
+        outFile = arg
+
 # create a particle
 particle = Particle(config, config.z0, config.p0, config.z1, config.p1)
 particle.initialize(config.initializationType)
 for i in range(config.initBackwardIterations):
     particle.backwardInitializationIteration(config.initBackWardOrder)
 
-print("time step: ", config.h)
+print("Saving to {}".format(outFile))
+print("Time step: ", config.h)
 print("Initialization: ")
 print("z_init: " + str(particle.z0))
 print("z0: " + str(particle.z1))
 
 # open output file
-out = open(config.outFile, "w+")
+out = open(outFile, "w+")
 out.write("t norbit dE1 x1 y1 z1 u1 r1 px1 py1 pz1 pu1\n")
 printToFile(0, config, particle, out, timestep0=True)
 printToFile(1, config, particle, out)
 out.close()
-out = open(config.outFile, "a+")
+out = open(outFile, "a+")
 
 #  ******
 # MAIN LOOP
