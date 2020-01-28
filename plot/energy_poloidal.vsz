@@ -1,5 +1,5 @@
 # Veusz saved document (version 3.1)
-# Saved at 2020-01-28T08:35:49.003718
+# Saved at 2020-01-28T22:05:11.556569
 
 AddImportPath(u'/home/filippo/Sorgenti/guiding-center-python/plot')
 ImportFileCSV(u'../../../out_guidingcenter.txt', delimiter=u' ', headermode=u'1st', linked=True)
