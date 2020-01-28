@@ -11,6 +11,7 @@ from integrators.implementations.explicit3_gaugeFree import SymplecticExplicit3G
 from integrators.implementations.explicit4 import SymplecticExplicit4
 from integrators.implementations.variationalMidpoint import VariationalMidpoint
 from integrators.implementations.implicit1 import SymplecticImplicit1
+from integrators.implementations.implicit1test import SymplecticImplicit1Test
 from integrators.implementations.euler import Euler
 
 
@@ -33,6 +34,8 @@ def integratorFactory(integratorName, config):
         return SymplecticExplicit4(config)
     elif integratorName == "SymplecticImplicit1":
         return SymplecticImplicit1(config)
+    elif integratorName == "SymplecticImplicit1Test":
+        return SymplecticImplicit1Test(config)
     # elif integratorName == "symplecticSemiexplicitQin":
     #     return SemiexplicitQin(config)
     # elif integratorName == "symplecticSemiexplicitQinRegularized":
