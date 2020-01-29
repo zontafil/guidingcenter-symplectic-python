@@ -29,7 +29,8 @@ cd ..
 
 # save plots
 echo "=== Saving charts"
-python3 src/plot.py --oshort=$FOLDERPREFIX/plots/ --olong=plots/"$DATE"_ -i out/out.txt
+python3 src/plot.py --oshort=$FOLDERPREFIX/plots/main.png --olong=plots/"$DATE"_ -i out/out.txt
+cp $FOLDERPREFIX/plots/main.png plots/last.png
 
 # if [ -f "Blines.txt" ]
 # then

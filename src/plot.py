@@ -63,7 +63,6 @@ elif config.initializationType == InitializationType.MANUAL:
 else:
     init = config.initializationType
 
-outFileShort += "main.png"
 outFileLong += "h{}_{}{}{}_{}_mu{}_{}_{}.png"\
                 .format(config.h, init,
                         config.initBackwardIterations, config.initBackWardOrder,
