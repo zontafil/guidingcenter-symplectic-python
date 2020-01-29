@@ -33,7 +33,7 @@ print("z0: " + str(particle.z1))
 
 # open output file
 out = open(outFile, "w+")
-out.write("t norbit dE1 x1 y1 z1 u1 r1 px1 py1 pz1 pu1 Adag_phi\n")
+out.write("t norbit dE1 x1 y1 z1 u1 r1 px1 py1 pz1 pu1 p_phi\n")
 printToFile(0, config, particle, out, timestep0=True)
 printToFile(1, config, particle, out)
 out.close()

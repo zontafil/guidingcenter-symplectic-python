@@ -95,10 +95,10 @@ ax[0, 1].set(xlabel="r", ylabel="z")
 ax[0, 1].scatter(data['r1'], data['z1'], s=0.1)
 
 # toroidal momentum
-ax[1, 0].set_ylim(set_axlims(data["Adag_phi"], 0.1))
+ax[1, 0].set_ylim(set_axlims(data["p_phi"], 0.1))
 ax[1, 0].ticklabel_format(style="sci", axis="both", scilimits=(0, 0))
-ax[1, 0].set(xlabel="timestep", ylabel="A_dag_phi")
-ax[1, 0].scatter(data['t'], data['Adag_phi'], s=0.1)
+ax[1, 0].set(xlabel="timestep", ylabel="p_phi")
+ax[1, 0].scatter(data['t'], data['p_phi'], s=0.1)
 
 fig.text(0.99, 0.99, info, va="top", ha="right")
 plt.savefig(outFileShort, dpi=300)

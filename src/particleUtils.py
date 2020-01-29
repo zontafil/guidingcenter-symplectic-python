@@ -45,13 +45,7 @@ def printToFile(t, config, particle, out, timestep0=False):
     # compute phi component of toroidal momentum
     BdB = particle.integrator.system.fieldBuilder.compute(z)
     Adag = BdB.Adag
-    Adag = BdB.A + z[3] * BdB.b
     Adag_phi = - Adag[0] * sintheta + Adag[1] * costheta
+    p_phi = r * Adag_phi
 
-    # Acyl = particle.integrator.system.fieldBuilder.A(z[:3])[2]
-    # BdBcyl = particle.integrator.system.fieldBuilder.B_dB_cyl(r, z[2])
-    # Bcyl = np.array([BdBcyl[0], BdBcyl[1], BdBcyl[2]])
-    # bcyl = Bcyl / np.linalg.norm(Bcyl)
-    # Adag_phi = Acyl[1] + z[3] * bcyl[1]
-
-    out.write("{} {} {} {} {} {} {}\n".format(t, t / config.stepsPerOrbit, dE, z_str, r, p_str, Adag_phi))
+    out.write("{} {} {} {} {} {} {}\n".format(t, t / config.stepsPerOrbit, dE, z_str, r, p_str, p_phi))
