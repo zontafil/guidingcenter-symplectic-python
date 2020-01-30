@@ -10,10 +10,14 @@ mkdir -p $FOLDERPREFIX/src
 mkdir -p $FOLDERPREFIX/plots
 mkdir -p plots
 mkdir -p out
+cd $SIM_PREFIX
+rm last
+ln -s $SIM_FOLDER last
+cd ..
 
 echo "=== Starting simulation: saving to $FOLDERPREFIX"
 echo "begin simulation "$DATE > $FOLDERPREFIX/info.txt
-python3 src/main.py -o $FOLDERPREFIX/out/out.txt | tee $FOLDERPREFIX/info.txt
+script -q -c "python3 src/main.py -o $FOLDERPREFIX/out/out.txt" /dev/null | tee $FOLDERPREFIX/info.txt
 echo "end simulation "$(date +"%Y-%m-%d_%H:%M:%S") >> $FOLDERPREFIX/info.txt
 echo "=== End simulation"
 
@@ -21,10 +25,6 @@ echo "Creating symbolic link of data and charts"
 cd out
 rm out.txt
 ln -s ../"$FOLDERPREFIX"/out/out.txt .
-cd ..
-cd $SIM_PREFIX
-rm last
-ln -s $SIM_FOLDER last
 cd ..
 
 # save plots
