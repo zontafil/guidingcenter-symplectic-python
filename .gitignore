@@ -6,3 +6,4 @@ config.py
 .vscode/.ropeproject/objectdb
 sims/
 plots/
+saved_plots/
