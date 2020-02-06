@@ -28,7 +28,7 @@ class Particle:
         if config.debugBfield:
             self.system = systemFactory(config.system, config)
             self.Bout = open("./Bdebug.txt", "w+")
-            self.Bout.write("t Ax Ay Az Bx By Bz\n")
+            self.Bout.write("t Ax Ay Az Bx By Bz Bxx Bxy Bxz Byx Byy Byz Bzx Bzy Bzz\n")
 
     def r1(self):
         return np.sqrt(self.z1[0]**2 + self.z1[1]**2)
@@ -55,8 +55,11 @@ class Particle:
         # print magnetic field along the particle orbit
         if self.config.debugBfield:
             field = self.system.fieldBuilder.compute(points.z2)
-            self.Bout.write("{} {} {} {} {} {} {}\n".format(t,
-                            field.A[0], field.A[1], field.A[2], field.B[0], field.B[1], field.B[2]))
+            self.Bout.write("{} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {}\n".format(t,
+                            field.A[0], field.A[1], field.A[2], field.B[0], field.B[1], field.B[2],
+                            field.BHessian[0][0], field.BHessian[0][1], field.BHessian[0,2],
+                            field.BHessian[1][0], field.BHessian[1][1], field.BHessian[1,2],
+                            field.BHessian[2][0], field.BHessian[2][1], field.BHessian[2,2]))
 
         # compute conserved quantitiesEerr0
         self.computeEnergyError()
