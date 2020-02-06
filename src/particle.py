@@ -111,6 +111,8 @@ class Particle:
 
         # compute initial energy
         self.Einit = self.integrator.system.hamiltonian(self.z0)
+        self.E0 = self.Einit
+        self.dE0 = 0
         self.computeEnergyError()
 
     """Initialize decreasing even-odd splitting by interpolating even N steps
@@ -118,21 +120,30 @@ class Particle:
     To be used with a first auxiliary initialization
     """
     def backwardInitializationIteration(self, order):
+
+        # backup initial energy
+        E0 = self.E0
+        dE0 = self.dE0
+
         even_points = np.zeros([order, 4])
         ts = np.zeros(order)
         for i in range(order):
             ts[i] = i * 2
         even_points[0, :] = np.array(self.z0)
         for i in range(order * 2 - 2):
-            self.stepForward(self.h)
+            self.stepForward(0)
             if i % 2 == 0:
                 even_points[int(i / 2) + 1, :] = np.array(self.z1)
 
         for i in range(4):
             interp = KroghInterpolator(ts, even_points[:, i])
             self.z1[i] = interp(1)
+        # self.z1 = (self.z0 + even_points[1., :]) / 2.
 
+        # restore initial position and energy
         self.z0 = np.array(even_points[0, :])
+        self.E0 = E0
+        self.dE0 = dE0
 
         if hasattr(self.integrator.__class__, "legendreLeft"):
             self.p0 = self.integrator.legendreLeft(self.z0, self.z1, self.h)
