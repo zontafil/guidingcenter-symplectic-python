@@ -91,6 +91,8 @@ ax[0, 0].set(xlabel="timestep", ylabel="dE/E0")
 ax[0, 0].scatter(data['t'], data['dE1'], s=0.1)
 
 # orbit
+ax[0, 1].set_ylim(set_axlims(data["z1"], 0.1))
+ax[0, 1].set_xlim(set_axlims(data["r1"], 0.1))
 ax[0, 1].set(xlabel="r", ylabel="z")
 ax[0, 1].scatter(data['r1'], data['z1'], s=0.1)
 
@@ -101,10 +103,10 @@ ax[1, 0].set(xlabel="timestep", ylabel="p_phi")
 ax[1, 0].scatter(data['t'], data['p_phi'], s=0.1)
 
 # x
-ax[1, 1].set_ylim(set_axlims(data["x1"], 0.1))
+ax[1, 1].set_ylim(set_axlims(data["r1"], 0.1))
 ax[1, 1].ticklabel_format(style="sci", axis="both", scilimits=(0, 0))
-ax[1, 1].set(xlabel="timestep", ylabel="x")
-ax[1, 1].scatter(data['t'], data['x1'], s=0.1)
+ax[1, 1].set(xlabel="timestep", ylabel="r1")
+ax[1, 1].scatter(data['t'], data['r1'], s=0.1)
 
 fig.text(0.99, 0.99, info, va="top", ha="right")
 plt.savefig(outFileShort, dpi=300)
