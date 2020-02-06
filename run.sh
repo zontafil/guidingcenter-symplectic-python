@@ -15,6 +15,9 @@ rm last
 ln -s $SIM_FOLDER last
 cd ..
 
+echo "=== Backing up sources"
+cp -r src/* $FOLDERPREFIX/src
+
 echo "=== Starting simulation: saving to $FOLDERPREFIX"
 echo "begin simulation "$DATE > $FOLDERPREFIX/info.txt
 script -q -c "python3 src/main.py -o $FOLDERPREFIX/out/out.txt" /dev/null | tee $FOLDERPREFIX/info.txt
@@ -36,6 +39,3 @@ cp $FOLDERPREFIX/plots/main.png plots/last.png
 # then
 # 	mv Blines.txt $SIM_PREFIX/$1/
 # fi
-
-echo "=== Backing up sources"
-cp -r src/* $FOLDERPREFIX/src
