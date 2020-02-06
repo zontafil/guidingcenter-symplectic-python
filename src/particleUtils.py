@@ -48,4 +48,7 @@ def printToFile(t, config, particle, out, timestep0=False):
     Adag_phi = - Adag[0] * sintheta + Adag[1] * costheta
     p_phi = r * Adag_phi
 
-    out.write("{} {} {} {} {} {} {}\n".format(t, t / config.stepsPerOrbit, dE, z_str, r, p_str, p_phi))
+    dz = np.linalg.norm(particle.z1 - particle.z0)
+    dz = particle.dE1 - particle.dE0
+
+    out.write("{} {} {} {} {} {} {} {}\n".format(t, t / config.stepsPerOrbit, dE, z_str, r, p_str, p_phi, dz))
