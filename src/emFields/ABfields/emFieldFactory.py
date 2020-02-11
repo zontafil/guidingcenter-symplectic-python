@@ -6,7 +6,7 @@ from emFields.ABfields.tokamak import Tokamak
 from emFields.ABfields.gradShafranov_spline_A import GradShafranovSplineA
 from emFields.ABfields.gradShafranov_spline_AB import GradShafranovSplineAB
 from emFields.ABfields.gradShafranov_analytic_AB import GradShafranov_analytic_AB
-from emFields.ABfields.gradShafranov_analytic_ITER import ITERfield
+from emFields.AB_dBfields.gradShafranov_analytic_ITER import ITERfield
 
 
 def EMFieldFactory(fieldName, config):

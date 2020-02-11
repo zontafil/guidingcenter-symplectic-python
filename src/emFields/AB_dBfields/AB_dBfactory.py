@@ -3,6 +3,7 @@ from emFields.AB_dBfields.splineField_BdB import SplineField_BdB
 from emFields.AB_dBfields.finiteDFromA import FiniteDFromA
 from emFields.AB_dBfields.gradShafranov_ABdB import GradShafranov_ABdB
 from emFields.AB_dBfields.gradShafranov_analytic_ABdB import GradShafranov_analytic_AB
+from emFields.AB_dBfields.gradShafranov_analytic_ITER import ITERfield
 
 
 def AB_dB_FieldFactory(fieldName, config):
@@ -16,5 +17,7 @@ def AB_dB_FieldFactory(fieldName, config):
         return GradShafranov_analytic_AB(config)
     elif fieldName == "finiteDFromA":
         return FiniteDFromA(config)
+    elif fieldName == "ITER":
+        return ITERfield(config)
 
     raise Exception("Invalid Guiding Field Algorithm (config->AB_dB_Algorithm). Choices: finiteDFromAB")
