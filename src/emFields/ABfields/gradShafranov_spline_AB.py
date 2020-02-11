@@ -36,12 +36,25 @@ class GradShafranovSplineAB(EMField):
     def B(self, x):
         R = np.sqrt(x[0]**2 + x[1]**2)
         Z = x[2]
+        psi = self.eqdsk.psi_spl(x=R, y=Z)[0][0]
         dpsi_dR = self.eqdsk.psi_spl(x=R, y=Z, dx=1, dy=0, grid=True)[0][0]
         dpsi_dz = self.eqdsk.psi_spl(x=R, y=Z, dx=0, dy=1, grid=True)[0][0]
+        if psi < max(self.eqdsk.sibry, self.eqdsk.simag) and psi > min(self.eqdsk.sibry, self.eqdsk.simag) \
+           and Z < self.eqdsk.sepmaxz and Z > self.eqdsk.sepminz:
+            # most likely in the main plasma
+            fpol = self.eqdsk.fpol_spl(psi)
+            dfpol_dpsi = self.eqdsk.fpol_spl(psi, 1)
+            d2fpol_d2psi = self.eqdsk.fpol_spl(psi, 2)
+        else:
+            print("WARNING: outside main plasma")
+            # most likely outside the main plasma
+            fpol = self.fpol[-1]
+            dfpol_dpsi = 0.
 
         curlA_cyl = np.zeros(3)
         curlA_cyl[0] = - dpsi_dz / R
-        curlA_cyl[1] = - 1 / R
+        # curlA_cyl[1] = - 1 / R
+        curlA_cyl[1] = - fpol / R
         curlA_cyl[2] = dpsi_dR / R
 
         return cyl2cart(curlA_cyl, x)

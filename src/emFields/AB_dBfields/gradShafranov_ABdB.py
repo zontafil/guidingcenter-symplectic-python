@@ -38,6 +38,7 @@ class GradShafranov_ABdB(AB_dB_FieldBuilder):
     def B_dB_cyl(self, R, Z):
 
         # interpolate psi and derivatives
+        psi = self.eqdsk.psi_spl(x=R, y=Z)[0][0]
         dpsi_dR = self.eqdsk.psi_spl(x=R, y=Z, dx=1, dy=0, grid=True)[0][0]
         dpsi_dz = self.eqdsk.psi_spl(x=R, y=Z, dx=0, dy=1, grid=True)[0][0]
         d2psi_dR2 = self.eqdsk.psi_spl(x=R, y=Z, dx=2, dy=0, grid=True)[0][0]
@@ -47,18 +48,29 @@ class GradShafranov_ABdB(AB_dB_FieldBuilder):
         d3psi_dRd2z = self.eqdsk.psi_spl(x=R, y=Z, dx=1, dy=2, grid=True)[0][0]
         d3psi_d3z = self.eqdsk.psi_spl(x=R, y=Z, dx=0, dy=3, grid=True)[0][0]
         d3psi_d3R = self.eqdsk.psi_spl(x=R, y=Z, dx=3, dy=0, grid=True)[0][0]
+        # fpol = self.eqdsk.fpol_spl(psi)
+        # dfpol_dpsi = self.eqdsk.fpol_spl(psi, 1)
+        # d2fpol_d2psi = self.eqdsk.fpol_spl(psi, 2)
+
+        fpol = 1
+        dfpol_dpsi = 0
+        d2fpol_d2psi = 0
 
         # evaluate the magnetic field
         BR = -dpsi_dz/R
-        Bp = -1 / R
+        # Bp = -1 / R
+        Bp = - fpol / R
         Bz = dpsi_dR/R
         # evaluate the derivatives
         dBR_dR = dpsi_dz/(R**2)-d2psi_dRdz/R
         dBR_dp = 0.
         dBR_dz = -d2psi_dz2/R
-        dBp_dR = 1/(R**2)
+        dBp_dR = fpol/(R**2)-dfpol_dpsi*dpsi_dR/R
         dBp_dp = 0.
-        dBp_dz = 0.
+        dBp_dz = - dfpol_dpsi*dpsi_dz/R
+        # dBp_dR = 1/(R**2)
+        # dBp_dp = 0.
+        # dBp_dz = 0.
         dBz_dR = -dpsi_dR/(R**2) + d2psi_dR2/R
         dBz_dp = 0.
         dBz_dz = d2psi_dRdz/R
@@ -66,9 +78,13 @@ class GradShafranov_ABdB(AB_dB_FieldBuilder):
         d2BR_d2R = -2 * dpsi_dz / (R**3) + 2 * d2psi_dRdz / (R**2) - d3psi_d2Rdz / R
         d2BR_dRdz = d2psi_dz2 / (R**2) - d3psi_dRd2z / R
         d2BR_d2z = -d3psi_d3z / R
-        d2Bp_d2R = -2 / (R**3)
-        d2Bp_dRdz = 0.
-        d2Bp_d2z = 0.
+        # d2Bp_d2R = -2 / (R**3)
+        d2Bp_d2R = -(2 * fpol / (R**3) - 2 * dfpol_dpsi * dpsi_dR / (R**2) + d2fpol_d2psi * dpsi_dR**2 / R + dfpol_dpsi * d2psi_dR2 / R)
+        d2Bp_dRdz = -(-dfpol_dpsi * dpsi_dz / (R**2) + d2fpol_d2psi * dpsi_dR * dpsi_dz / R + dfpol_dpsi * d2psi_dRdz / R)
+        d2Bp_d2z = -(d2fpol_d2psi * dpsi_dz**2 / R + dfpol_dpsi * d2psi_dz2 / R)
+        # d2Bp_d2R = -2 / (R**3)
+        # d2Bp_dRdz = 0.
+        # d2Bp_d2z = 0.
         d2Bz_d2R = 2 * dpsi_dR / (R**3) - 2 * d2psi_dR2 / (R**2) + d3psi_d3R / R
         d2Bz_dRdz = -d2psi_dRdz / (R**2) + d3psi_d2Rdz / R
         d2Bz_d2z = d3psi_dRd2z / R
