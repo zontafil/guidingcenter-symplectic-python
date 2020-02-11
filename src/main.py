@@ -3,6 +3,10 @@ from particle import Particle
 from particleUtils import printToFile
 import sys
 import getopt
+from integrators.integratorFactory import integratorFactory
+from particleUtils import z0z1p0p1
+import numpy as np
+
 
 
 # configuration
@@ -30,6 +34,7 @@ print("Time step: ", config.h)
 print("Initialization: ")
 print("z_init: " + str(particle.z0))
 print("z0: " + str(particle.z1))
+print("E0: " + str(particle.E0))
 
 # open output file
 out = open(outFile, "w+")
@@ -42,12 +47,32 @@ out = open(outFile, "a+")
 #  ******
 # MAIN LOOP
 #  ******
+reinit = True
 for t in range(2, config.nsteps):
     # PRINT TO SCREEN EVERY N STEPS
     if (t % config.printTimestepMult) == 0:
         print("Timestep " + str(t))
 
     particle.stepForward(t)
+
+    if reinit is False:
+        if (particle.z0[3] / particle.z1[3]) < 0:
+            print("reinit")
+            auxiliaryIntegrator = integratorFactory(config.auxiliaryIntegrator, config)
+            while True:
+                # print(np.abs(particle.z0[3]))
+                if np.abs(particle.z0[3]) < 1E-6:
+                    break
+                points = z0z1p0p1(z1=particle.z0, z0=None, p0=None, p1=None)
+                points = auxiliaryIntegrator.stepForward(points, config.h / 10000)
+                particle.z0 = points.z2
+            print("reinit done")
+            reinit = True
+            particle.initialize(config.initializationType)
+            for i in range(config.initBackwardIterations):
+                particle.backwardInitializationIteration(config.initBackWardOrder)
+            print(particle.z0)
+            print(particle.z1)
 
     # PRINT TO FILE
     if (t % config.fileTimestepMult) == 0:
