@@ -8,6 +8,7 @@ from integrators.implementations.explicit4_gaugeFree import SymplecticExplicit4_
 from integrators.implementations.explicit4_thirdOrder import SymplecticExplicit4_ThirdOrder
 from integrators.implementations.explicit3 import SymplecticExplicit3
 from integrators.implementations.explicit3_gaugeFree import SymplecticExplicit3GaugeFree
+from integrators.implementations.explicit4_test import SymplecticExplicitTest
 from integrators.implementations.explicit4 import SymplecticExplicit4
 from integrators.implementations.variationalMidpoint import VariationalMidpoint
 from integrators.implementations.implicit1 import SymplecticImplicit1
@@ -41,6 +42,8 @@ def integratorFactory(integratorName, config):
         return SymplecticExplicit4_GaugeFree(config)
     elif integratorName == "SymplecticExplicit4_ThirdOrder":
         return SymplecticExplicit4_ThirdOrder(config)
+    elif integratorName == "SymplecticExplicitTest":
+        return SymplecticExplicitTest(config)
     # elif integratorName == "SymplecticExplicit3_GaugeInvariant":
     #     return SymplecticExplicit3_GaugeFree(config)
 
