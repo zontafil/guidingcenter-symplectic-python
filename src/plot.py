@@ -36,21 +36,23 @@ plt.rcParams.update({'font.size': 5})
 config = Config()
 
 # build the filenames
-outFileShort = ""
-outFileLong = ""
+folderprefix = ""
+longFilePrefix = ""
 inputFile = config.outFile  # output of integrator is input for plotting
 try:
-    opts, args = getopt.getopt(sys.argv[1:], "i:", ["olong=", "oshort="])
+    opts, args = getopt.getopt(sys.argv[1:], "i:", ["folderprefix=", "date="])
 except getopt.GetoptError:
     print("Usage python3 plot.py -oshort outFile -olong outFile -i input_data")
     sys.exit(2)
 for opt, arg in opts:
-    if opt == "--oshort":
-        outFileShort = arg
-    if opt == "--olong":
-        outFileLong = arg
+    if opt == "--folderprefix":
+        folderprefix = arg
+    if opt == "--date":
+        longFilePrefix = arg + "_"
     if opt == "-i":
         inputFile = arg
+
+longFilePrefix = folderprefix + longFilePrefix
 
 if config.initializationType == InitializationType.HAMILTONIAN:
     init = "ham"
@@ -63,11 +65,12 @@ elif config.initializationType == InitializationType.MANUAL:
 else:
     init = config.initializationType
 
-outFileLong += "h{}_{}{}{}_{}_mu{}_{}_{}.png"\
+longFilePrefix += "h{}_{}{}{}_{}_mu{}_{}_{}.png"\
                 .format(config.h, init,
                         config.initBackwardIterations, config.initBackWardOrder,
                         config.integrator, config.mu,
                         config.AB_dB_Algorithm, config.emField)
+shortFilePrefix = folderprefix + "last_"
 
 x = []
 y = []
@@ -109,5 +112,16 @@ ax[1, 1].set(xlabel="timestep", ylabel="r1")
 ax[1, 1].scatter(data['t'], data['r1'], s=0.1)
 
 fig.text(0.99, 0.99, info, va="top", ha="right")
-plt.savefig(outFileShort, dpi=300)
-plt.savefig(outFileLong, dpi=300)
+plt.savefig(shortFilePrefix + "main.png", dpi=300)
+plt.savefig(longFilePrefix, dpi=300)
+
+
+fig, ax = plt.subplots(1, 1)
+# u
+ax.set_ylim(set_axlims(data["u1"], 0.1))
+ax.ticklabel_format(style="sci", axis="both", scilimits=(0, 0))
+ax.set(xlabel="timestep", ylabel="u1")
+ax.scatter(data['t'], data['u1'], s=0.1)
+
+plt.savefig(shortFilePrefix + "u.png", dpi=300)
+
