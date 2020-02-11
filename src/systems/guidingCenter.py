@@ -25,7 +25,7 @@ class GuidingCenter(System):
 
         p = np.zeros(4)
         ABdB = self.fieldBuilder.compute(z)
-        p[:3] = ABdB.A + z[3:] * ABdB.b
+        p[:3] = ABdB.A + z[3] * ABdB.b
 
         return p
 
