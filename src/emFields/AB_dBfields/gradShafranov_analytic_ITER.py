@@ -255,11 +255,31 @@ class ITERfield(AB_dB_FieldBuilder):
     def A(self, x):
         r = np.sqrt(x[0]**2 + x[1]**2)
         z = x[2]
+        sintheta = x[1] / r
+        costheta = x[0] / r
 
         psi = self.psi(r, z)
+        dpsi_dR = self.dpsix(r, z, self.c)
+        dpsi_dz = self.dpsiy(r, z, self.c)
 
         Acyl = np.array([0, psi/r, np.log(r / self.R0)])
-        return cyl2cart(Acyl, x)
+        A = cyl2cart(Acyl, x)
+
+        # compute Ajac
+        dAx_dr = psi / r**2 * sintheta - dpsi_dR / r * sintheta
+        dAx_dp = - psi / r**2 * costheta
+        dAx_dz = - dpsi_dz / r * sintheta
+        dAy_dr = - psi / r**2 * costheta + dpsi_dR / r * costheta
+        dAy_dp = - psi / r**2 * sintheta
+        dAy_dz = dpsi_dz / r * costheta
+        dAz_dr = 1 / r
+        dAz_dp = 0
+        dAz_dz = 0
+        Ajac = np.zeros([3, 3])
+        Ajac[0, :] = cyl2cart(np.array([dAx_dr, dAx_dp, dAx_dz]), x)
+        Ajac[1, :] = cyl2cart(np.array([dAy_dr, dAy_dp, dAy_dz]), x)
+        Ajac[2, :] = cyl2cart(np.array([dAz_dr, dAz_dp, dAz_dz]), x)
+        return [A, Ajac]
 
     def B(self, x):
         R = np.sqrt(x[0]**2 + x[1]**2)
@@ -380,7 +400,9 @@ class ITERfield(AB_dB_FieldBuilder):
         Bnorm = np.linalg.norm(B)
         b = B / Bnorm
 
-        A = self.A(x)
+        A_Ajac = self.A(x)
+        A = A_Ajac[0]
+        Ajac = A_Ajac[1]
         Adag = A + u * b
 
         # build curl B (cyl and cartesian)
@@ -419,6 +441,11 @@ class ITERfield(AB_dB_FieldBuilder):
         Bjac[1, :] = cyl2cart(np.array([dBy_dr, dBy_dp, dBy_dz]), x)
         Bjac[2, :] = cyl2cart(np.array([dBz_dr, dBz_dp, dBz_dz]), x)
 
+        Adag_jac = Ajac + u * Bjac / Bnorm
+        Adag_jac[0, :] += u * B[0] * np.transpose(grad1_B)
+        Adag_jac[1, :] += u * B[1] * np.transpose(grad1_B)
+        Adag_jac[2, :] += u * B[2] * np.transpose(grad1_B)
+
         # compute |B| hessian
         d2B_d2R = np.array([BdB[12], BdB[15], BdB[18]])
         d2B_dRdz = np.array([BdB[13], BdB[16], BdB[19]])
@@ -442,5 +469,5 @@ class ITERfield(AB_dB_FieldBuilder):
         BHessian[1, :] = cyl2cart(gradCyl_dmodB_dy, x)
         BHessian[2, :] = cyl2cart(gradCyl_dmodB_dz, x)
 
-        return ABdBGuidingCenter(Adag_jac=0, A=A, Adag=Adag,
+        return ABdBGuidingCenter(Adag_jac=Adag_jac, A=A, Adag=Adag,
                                  B=B, Bgrad=B_grad, b=b, Bnorm=Bnorm, BHessian=BHessian, Bdag=Bdag)
