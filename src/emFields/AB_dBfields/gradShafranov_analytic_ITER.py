@@ -4,10 +4,11 @@
 import numpy as np
 import collections
 from emFields.AB_dBfields.AB_dBfield import AB_dB_FieldBuilder, ABdBGuidingCenter
+import matplotlib.pyplot as plt
+import matplotlib.cm as cm
 
 
 SolovevParams = collections.namedtuple("SolovevParams", "A eps delta alpha k")
-
 
 def cyl2cart(v, x):
     r = np.sqrt(x[0]*x[0] + x[1]*x[1])
@@ -28,6 +29,7 @@ class ITERfield(AB_dB_FieldBuilder):
         self.hx = config.hx
 
         self.computeCoeff()
+        # self.draw_B()
 
     def computeCoeff(self):
 
@@ -323,13 +325,6 @@ class ITERfield(AB_dB_FieldBuilder):
         d3psi_d3z = self.dpsiyyy(R, Z, self.c)
         d3psi_d3R = self.dpsixxx(R, Z, self.c)
 
-        # print("analytic")
-        # print(d3psi_d3z)
-        # print("numerical")
-        # numer = 0.5*(self.dpsiyy(R,Z+self.hx,self.c) - self.dpsiyy(R,Z-self.hx,self.c))/self.hx
-        # print(numer)
-
-
         # evaluate the magnetic field
         BR = -dpsi_dz/R
         Bp = -1 / R
@@ -362,6 +357,39 @@ class ITERfield(AB_dB_FieldBuilder):
                          d2BR_d2R, d2BR_dRdz, d2BR_d2z,
                          d2Bp_d2R, d2Bp_dRdz, d2Bp_d2z,
                          d2Bz_d2R, d2Bz_dRdz, d2Bz_d2z])
+
+    def draw_B(self):
+        nr = 100
+        nz = 100
+        R = np.linspace(0.5, 1.5, nr)
+        Z = np.linspace(-0.6,
+                        0.6, nz)
+        RR, ZZ = np.meshgrid(R, Z)
+        BR = np.zeros([nr, nz])
+        Bp = np.zeros([nr, nz])
+        Bz = np.zeros([nr, nz])
+        for ir in range(nr):
+            for iz in range(nz):
+                # print(R[ir])
+                temp = self.B_dB_cyl(R[ir], Z[iz])
+                BR[ir, iz] = temp[0]
+                Bp[ir, iz] = temp[1]
+                Bz[ir, iz] = temp[2]
+
+        fig, axs = plt.subplots(nrows=1, ncols=3, sharex=True)
+        ax = axs[0]
+        ax.contourf(RR, ZZ, BR.transpose(), 50, cmap=cm.hot)
+        ax.set_title('BR')
+
+        ax = axs[1]
+        ax.contourf(RR, ZZ, Bp.transpose(), 50, cmap=cm.hot)
+        ax.set_title('Bphi')
+
+        ax = axs[2]
+        ax.contourf(RR, ZZ, Bz.transpose(), 50, cmap=cm.hot)
+        ax.set_title('Bz')
+
+        plt.show()
 
     def d3B(self, z):
         ret = np.zeros([3, 3, 3])
