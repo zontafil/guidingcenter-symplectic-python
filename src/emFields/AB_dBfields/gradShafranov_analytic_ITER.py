@@ -30,8 +30,11 @@ class ITERfield(AB_dB_FieldBuilder):
         self.R0 = config.R0
         self.hx = config.hx
 
+        self.drawZoomOut = 1.3
         self.computeCoeff()
         # self.draw_B()
+        # self.draw_psirz()
+        # plt.show()
 
     def computeCoeff(self):
 
@@ -242,19 +245,40 @@ class ITERfield(AB_dB_FieldBuilder):
                          d2Bp_d2R, d2Bp_dRdz, d2Bp_d2z,
                          d2Bz_d2R, d2Bz_dRdz, d2Bz_d2z])
 
+    def draw_psirz(self):
+        nr = 100
+        nz = 100
+        R = np.linspace(1 - self.drawZoomOut*self.eps, 1 + self.drawZoomOut*self.eps, nr)
+        Z = np.linspace(-self.drawZoomOut*self.k*self.eps,
+                        self.drawZoomOut*self.k*self.eps, nz)
+        RR, ZZ = np.meshgrid(R, Z)
+        psi = np.zeros([nr, nz])
+        for ir in range(nr):
+            for iz in range(nz):
+                psi[ir, iz] = self.psi(R[ir], Z[iz])
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+        cpf = ax.contourf(RR, ZZ, psi.transpose(), 50, cmap=cm.hot)
+        colours = ['k' if level < 0 else 'w' for level in cpf.levels]
+        cp = ax.contour(RR, ZZ, psi.transpose(), 50, colors=colours)
+        ax.clabel(cp, fontsize=12, colors=colours)
+        ax.axis('scaled')
+        # ax.plot(self.rlim, self.zlim, c='k', linewidth=2.0)
+        # ax.plot(self.rbbbs, self.zbbbs, c='k', linewidth=2.0)
+        fig.show()
+
     def draw_B(self):
         nr = 100
         nz = 100
-        R = np.linspace(0.5, 1.5, nr)
-        Z = np.linspace(-0.6,
-                        0.6, nz)
+        R = np.linspace(1 - self.drawZoomOut*self.eps, 1 + self.drawZoomOut*self.eps, nr)
+        Z = np.linspace(-self.drawZoomOut*self.k*self.eps,
+                        self.drawZoomOut*self.k*self.eps, nz)
         RR, ZZ = np.meshgrid(R, Z)
         BR = np.zeros([nr, nz])
         Bp = np.zeros([nr, nz])
         Bz = np.zeros([nr, nz])
         for ir in range(nr):
             for iz in range(nz):
-                # print(R[ir])
                 temp = self.B_dB_cyl(R[ir], Z[iz])
                 BR[ir, iz] = temp[0]
                 Bp[ir, iz] = temp[1]
@@ -262,7 +286,7 @@ class ITERfield(AB_dB_FieldBuilder):
 
         fig, axs = plt.subplots(nrows=1, ncols=3, sharex=True)
         ax = axs[0]
-        ax.contourf(RR, ZZ, BR.transpose(), 50, cmap=cm.hot)
+        ax.contourf(RR, ZZ, BR.transpose(), 20, cmap=cm.hot)
         ax.set_title('BR')
 
         ax = axs[1]
@@ -273,7 +297,7 @@ class ITERfield(AB_dB_FieldBuilder):
         ax.contourf(RR, ZZ, Bz.transpose(), 50, cmap=cm.hot)
         ax.set_title('Bz')
 
-        plt.show()
+        fig.show()
 
     def d3B(self, z):
         ret = np.zeros([3, 3, 3])
