@@ -1,3 +1,4 @@
+# flake8: noqa
 # ITER Shafranov equilibrium. See
 # https://aip.scitation.org/doi/full/10.1063/1.3328818
 
@@ -9,6 +10,7 @@ import matplotlib.cm as cm
 
 
 SolovevParams = collections.namedtuple("SolovevParams", "A eps delta alpha k")
+
 
 def cyl2cart(v, x):
     r = np.sqrt(x[0]*x[0] + x[1]*x[1])
@@ -75,10 +77,11 @@ class ITERfield(AB_dB_FieldBuilder):
         ret[0] = self.psiC(1 + self.eps, 0, c)
         ret[1] = self.psiC(1 - self.eps, 0, c)
         ret[2] = self.psiC(1 - self.delta * self.eps, self.k * self.eps, c)
-        ret[3] = self.dpsiC_dx(1 - self.delta * self.eps, self.k * self.eps, c)
-        ret[4] = self.d2psiC_d2y(1 + self.eps, 0, c) + self.N1 * self.dpsiC_dx(1 + self.eps, 0, c)
-        ret[5] = self.d2psiC_d2y(1 - self.eps, 0, c) + self.N2 * self.dpsiC_dx(1 - self.eps, 0, c)
-        ret[6] = self.d2psiC_d2x(1 - self.delta * self.eps, self.k * self.eps, c) + self.N3 * self.dpsiC_dy(1 - self.delta * self.eps, self.k * self.eps, c)
+        ret[3] = self.dpsix(1 - self.delta * self.eps, self.k * self.eps, c)
+        ret[4] = self.dpsiyy(1 + self.eps, 0, c) + self.N1 * self.dpsix(1 + self.eps, 0, c)
+        ret[5] = self.dpsiyy(1 - self.eps, 0, c) + self.N2 * self.dpsix(1 - self.eps, 0, c)
+        ret[6] = self.dpsixx(1 - self.delta * self.eps, self.k * self.eps, c) +\
+            self.N3 * self.dpsiy(1 - self.delta * self.eps, self.k * self.eps, c)
 
         return ret
 
@@ -99,157 +102,38 @@ class ITERfield(AB_dB_FieldBuilder):
         return ret
 
     def dpsiy(self, x, y, c):
-        dpsi1 = 0
-        dpsi2 = 0
-        dpsi3 = 2*y
-        dpsi4 = - 8*x**2*y
-        dpsi5 = 8*y**3 - 18*y*x**2 - 24*x**2*y*np.log(x)
-        dpsi6 = -24*x**4*y + 32*x**2*y**3
-        dpsi7 = 48*y**5 - 560*y**3*x**2 + 150*y*x**4 + 360*x**4*y*np.log(x) - 480*x**2*y**3*np.log(x)
-
-        ret = c[0] * dpsi1 + c[1]*dpsi2 + c[2]*dpsi3 + c[3]*dpsi4 +\
-            c[4]*dpsi5 + c[5]*dpsi6 + c[6]*dpsi7
-
-        return ret
+        return 2*c[2]*y - 8*c[3]*x**2*y + c[5]*(-24*x**4*y + 32*x**2*y**3) + c[4]*(-18*x**2*y + 8*y**3 - 24*x**2*y*np.log(x)) +\
+            c[6]*(150*x**4*y - 560*x**2*y**3 + 48*y**5 + 360*x**4*y*np.log(x) - 480*x**2*y**3*np.log(x))
 
     def dpsix(self, x, y, c):
-        dpsi1 = 0
-        dpsi2 = 2*x
-        dpsi3 = - 2*x * np.log(x) - x
-        dpsi4 = 4*x**3 - 8*x*y**2
-        dpsi5 = - 30*y**2*x + 12*x**3*np.log(x) + 3*x**3 - 24*x*y**2*np.log(x)
-        dpsi6 = 6*x**5 - 48*x**3*y**2 + 16*x*y**4
-        dpsi7 = -400*y**4*x + 480*y**2*x**3 -15*x**5 -90*x**5*np.log(x) +720*x**3*y**2*np.log(x) -240*x*y**4*np.log(x)
-
-        ret = x**3 / 2. + self.Acoeff * (0.5 * x + x * np.log(x) - x**3 / 2.) +\
-            c[0] * dpsi1 + c[1]*dpsi2 + c[2]*dpsi3 + c[3]*dpsi4 +\
-            c[4]*dpsi5 + c[5]*dpsi6 + c[6]*dpsi7
-
-        return ret
+        return self.Acoeff*(-(0.5*x**3) + 0.5*x + 1.*x*np.log(x)) + 2*c[1]*x + c[2]*(-x - 2*x*np.log(x)) + c[3]*(4*x**3 - 8*x*y**2) +\
+                c[4]*(3*x**3 + 12*x**3*np.log(x) - 30*x*y**2 - 24*x*y**2*np.log(x)) + c[5]*(6*x**5 - 48*x**3*y**2 + 16*x*y**4) +\
+                c[6]*(-(15*x**5) - 90*x**5*np.log(x) + 480*x**3*y**2 + 720*x**3*y**2*np.log(x) - 400*x*y**4 - 240*x*y**4*np.log(x)) + 0.5*x**3
 
     def dpsixx(self, x, y, c):
-        dpsi1 = 0
-        dpsi2 = 2
-        dpsi3 = - 2 * np.log(x) -3
-        dpsi4 = 12*x**2 - 8*y**2
-        dpsi5 = -54*y**2 +21*x**2 + 36*x**2*np.log(x) -24*y**2*np.log(x)
-        dpsi6 = 30*x**4 - 144*x**2*y**2 + 16*y**4
-        dpsi7 = -640*y**4 +2160*y**2*x**2 -165*x**4 -450*x**4*np.log(x) +2160*x**2*y**2*np.log(x) -240*y**4*np.log(x)
-
-        ret = 3*x**2 / 2. + self.Acoeff * (1.5 + np.log(x) - 3*x**2 / 2.) +\
-            c[0] * dpsi1 + c[1]*dpsi2 + c[2]*dpsi3 + c[3]*dpsi4 +\
-            c[4]*dpsi5 + c[5]*dpsi6 + c[6]*dpsi7
-
-        return ret
+        return 2*c[1] + 1.5*x**2 + c[3]*(12*x**2 - 8*y**2) + c[5]*(30*x**4 - 144*x**2*y**2 + 16*y**4) + c[2]*(-3 - 2*np.log(x)) + self.Acoeff*(1.5 - 1.5*x**2 + 1.*np.log(x)) +\
+            c[4]*(21*x**2 - 54*y**2 + 36*x**2*np.log(x) - 24*y**2*np.log(x)) + c[6]*(-165*x**4 + 2160*x**2*y**2 - 640*y**4 - 450*x**4*np.log(x) + 2160*x**2*y**2*np.log(x) -\
+                240*y**4*np.log(x))
 
     def dpsiyy(self, x, y, c):
-        dpsi1 = 0
-        dpsi2 = 0
-        dpsi3 = 2
-        dpsi4 = - 8*x**2
-        dpsi5 = 24*y**2 - 18*x**2 - 24*x**2*np.log(x)
-        dpsi6 = - 24*x**4 + 96*x**2*y**2
-        dpsi7 = 240*y**4 -1680*y**2*x**2 +150*x**4 +360*x**4*np.log(x) -1440*x**2*y**2*np.log(x)
-
-        ret = c[0] * dpsi1 + c[1]*dpsi2 + c[2]*dpsi3 + c[3]*dpsi4 +\
-            c[4]*dpsi5 + c[5]*dpsi6 + c[6]*dpsi7
-
-        return ret
+        return 2*c[2] - 8*c[3]*x**2 + c[5]*(-24*x**4 + 96*x**2*y**2) + c[4]*(-18*x**2 + 24*y**2 - 24*x**2*np.log(x)) +\
+            c[6]*(150*x**4 - 1680*x**2*y**2 + 240*y**4 + 360*x**4*np.log(x) - 1440*x**2*y**2*np.log(x))
 
     def dpsixy(self, x, y, c):
-        dpsi1 = 0
-        dpsi2 = 0
-        dpsi3 = 0
-        dpsi4 = - 16*x*y
-        dpsi5 = - 60*y*x - 48*x*y*np.log(x)
-        dpsi6 = - 96*x**3*y + 64*x*y**3
-        dpsi7 = -1600*y**3*x +960*y*x**3 +1440*x**3*y*np.log(x) -960*x*y**3*np.log(x)
-
-        ret = c[0] * dpsi1 + c[1]*dpsi2 + c[2]*dpsi3 + c[3]*dpsi4 +\
-            c[4]*dpsi5 + c[5]*dpsi6 + c[6]*dpsi7
-
-        return ret
+        return -16*c[3]*x*y + c[5]*(-96*x**3*y + 64*x*y**3) + c[4]*(-60*x*y - 48*x*y*np.log(x)) + c[6]*(960*x**3*y - 1600*x*y**3 + 1440*x**3*y*np.log(x) - 960*x*y**3*np.log(x))
 
     def dpsixxy(self, x, y, c):
-        dpsi1 = 0
-        dpsi2 = 0
-        dpsi3 = 0
-        dpsi4 = - 16*y
-        dpsi5 = - 108*y -48*y*np.log(x)
-        dpsi6 = -288*x**2*y + 64*y**3
-        dpsi7 = - 2560*y**3 + 4320*y*x**2 +4320*x**2*y*np.log(x) -960*y**3*np.log(x)
-
-        ret = c[0] * dpsi1 + c[1]*dpsi2 + c[2]*dpsi3 + c[3]*dpsi4 +\
-            c[4]*dpsi5 + c[5]*dpsi6 + c[6]*dpsi7
-
-
-        return ret
+        return -16*c[3]*y + c[5]*(-288*x**2*y + 64*y**3) + c[4]*(-108*y - 48*y*np.log(x)) + c[6]*(4320*x**2*y - 2560*y**3 + 4320*x**2*y*np.log(x) - 960*y**3*np.log(x))
 
     def dpsixyy(self, x, y, c):
-        dpsi1 = 0
-        dpsi2 = 0
-        dpsi3 = 0
-        dpsi4 = - 16*x
-        dpsi5 = - 60*x - 48*x*np.log(x)
-        dpsi6 = - 96*x**3 + 192*x*y**2
-        dpsi7 = -4800*y**2*x + 960*x**3 +1440*x**3*np.log(x) -2880*x*y**2*np.log(x)
-
-        ret = c[0] * dpsi1 + c[1]*dpsi2 + c[2]*dpsi3 + c[3]*dpsi4 +\
-            c[4]*dpsi5 + c[5]*dpsi6 + c[6]*dpsi7
-
-        return ret
+        return -16*c[3]*x + c[5]*(-96*x**3 + 192*x*y**2) + c[4]*(-60*x - 48*x*np.log(x)) + c[6]*(960*x**3 - 4800*x*y**2 + 1440*x**3*np.log(x) - 2880*x*y**2*np.log(x))
 
     def dpsixxx(self, x, y, c):
-        dpsi1 = 0
-        dpsi2 = 0
-        dpsi3 = - 2 / x
-        dpsi4 = 24*x
-        dpsi5 = +78*x +72*x*np.log(x) -24*y**2/x
-        dpsi6 = 120*x**3 - 288*x*y**2
-        dpsi7 = 6480*y**2*x -1110*x**3 -1800*x**3*np.log(x) +4320*x*y**2*np.log(x) -240*y**4/x
-
-        ret = 3*x + self.Acoeff * (1./x - 3*x) +\
-            c[0] * dpsi1 + c[1]*dpsi2 + c[2]*dpsi3 + c[3]*dpsi4 +\
-            c[4]*dpsi5 + c[5]*dpsi6 + c[6]*dpsi7
-
-        return ret
+        return self.Acoeff*(1./x - 3.*x) - (2*c[2])/x + 3.*x + 24*c[3]*x + c[5]*(120*x**3 - 288*x*y**2) + c[4]*(78*x - (24*y**2)/x + 72*x*np.log(x)) +\
+            c[6]*(-1110*x**3 + 6480*x*y**2 - (240*y**4)/x - 1800*x**3*np.log(x) + 4320*x*y**2*np.log(x))
 
     def dpsiyyy(self, x, y, c):
-        dpsi1 = 0
-        dpsi2 = 0
-        dpsi3 = 0
-        dpsi4 = 0
-        dpsi5 = 48*y
-        dpsi6 = + 192*x**2*y
-        dpsi7 = 960*y**3 -3360*y*x**2 - 2880*x**2*y*np.log(x)
-
-        ret = c[0] * dpsi1 + c[1]*dpsi2 + c[2]*dpsi3 + c[3]*dpsi4 +\
-            c[4]*dpsi5 + c[5]*dpsi6 + c[6]*dpsi7
-
-        return ret
-
-
-    def dpsiC_dx(self, x, y, c):
-        x1 = x + self.hx
-        x0 = x - self.hx
-        return 0.5 * (self.psiC(x1, y, c) - self.psiC(x0, y, c)) / self.hx
-
-    def dpsiC_dy(self, x, y, c):
-        y1 = y + self.hx
-        y0 = y - self.hx
-        return 0.5 * (self.psiC(x, y1, c) - self.psiC(x, y0, c)) / self.hx
-
-    def d2psiC_d2y(self, x, y, c):
-        y1 = y + self.hx
-        y0 = y - self.hx
-
-        return (self.psiC(x, y1, c) - 2.*self.psiC(x, y, c) + self.psiC(x, y0, c)) / self.hx**2
-
-    def d2psiC_d2x(self, x, y, c):
-        x1 = x + self.hx
-        x0 = x - self.hx
-
-        return (self.psiC(x1, y, c) - 2.*self.psiC(x, y, c) + self.psiC(x0, y, c)) / self.hx**2
+        return 48*c[4]*y + 192*c[5]*x**2*y + c[6]*(-3360*x**2*y + 960*y**3 - 2880*x**2*y*np.log(x))
 
     def psi(self, x, y):
         return self.psiC(x, y, self.c)
