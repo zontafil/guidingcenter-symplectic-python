@@ -30,7 +30,7 @@ def set_axlims(series, marginfactor):
     return minlim, maxlim
 
 
-plt.rcParams.update({'font.size': 5})
+plt.rcParams.update({'font.size': 8})
 
 # configuration
 config = Config()
@@ -94,6 +94,10 @@ ax[0, 0].set(xlabel="timestep", ylabel="dE/E0")
 ax[0, 0].scatter(data['t'], data['dE1'], s=0.1)
 
 # orbit
+# ax[0, 1].set_ylim(set_axlims(data["y1"], 0.1))
+# ax[0, 1].set_xlim(set_axlims(data["x1"], 0.1))
+# ax[0, 1].set(xlabel="r", ylabel="z")
+# ax[0, 1].scatter(data['x1'], data['y1'], s=0.1)
 ax[0, 1].set_ylim(set_axlims(data["z1"], 0.1))
 ax[0, 1].set_xlim(set_axlims(data["r1"], 0.1))
 ax[0, 1].set(xlabel="r", ylabel="z")
@@ -106,6 +110,10 @@ ax[1, 0].set(xlabel="timestep", ylabel="p_phi")
 ax[1, 0].scatter(data['t'], data['p_phi'], s=0.1)
 
 # x
+# ax[1, 1].set_ylim(set_axlims(data["x1"], 0.1))
+# ax[1, 1].ticklabel_format(style="sci", axis="both", scilimits=(0, 0))
+# ax[1, 1].set(xlabel="timestep", ylabel="x1")
+# ax[1, 1].scatter(data['t'], data['x1'], s=0.1)
 ax[1, 1].set_ylim(set_axlims(data["r1"], 0.1))
 ax[1, 1].ticklabel_format(style="sci", axis="both", scilimits=(0, 0))
 ax[1, 1].set(xlabel="timestep", ylabel="r1")
@@ -115,13 +123,39 @@ fig.text(0.99, 0.99, info, va="top", ha="right")
 plt.savefig(shortFilePrefix + "main.png", dpi=300)
 plt.savefig(longFilePrefix, dpi=300)
 
+plt.rcParams.update({'font.size': 14})
 
-fig, ax = plt.subplots(1, 1)
 # u
+fig, ax = plt.subplots(1, 1)
 ax.set_ylim(set_axlims(data["u1"], 0.1))
 ax.ticklabel_format(style="sci", axis="both", scilimits=(0, 0))
 ax.set(xlabel="timestep", ylabel="u1")
 ax.scatter(data['t'], data['u1'], s=0.1)
 
 plt.savefig(shortFilePrefix + "u.png", dpi=300)
+
+# dE
+fig, ax = plt.subplots(1, 1)
+ax.set_ylim(set_axlims(data["dE1"], 0.1))
+ax.ticklabel_format(style="sci", axis="both", scilimits=(0, 0))
+ax.set(xlabel="timestep", ylabel="dE/E0")
+ax.scatter(data['t'], data['dE1'], s=4, color="black")
+
+plt.savefig(shortFilePrefix + "dE.png", dpi=200)
+# pphi
+fig, ax = plt.subplots(1, 1)
+ax.set_ylim(set_axlims(data["p_phi"], 0.1))
+ax.ticklabel_format(style="sci", axis="both", scilimits=(0, 0))
+ax.set(xlabel="timestep", ylabel="p_phi")
+ax.scatter(data['t'], data['p_phi'], s=4, color="black")
+plt.savefig(shortFilePrefix + "pphi.png", dpi=200)
+
+# orbit
+fig, ax = plt.subplots(1, 1)
+ax.set_ylim(set_axlims(data["z1"], 0.1))
+ax.set_xlim(set_axlims(data["r1"], 0.1))
+ax.ticklabel_format(style="sci", axis="both", scilimits=(0, 0))
+ax.set(xlabel="r", ylabel="z")
+ax.scatter(data['r1'], data['z1'], s=4, color="black")
+plt.savefig(shortFilePrefix + "orbit.png", dpi=200)
 
