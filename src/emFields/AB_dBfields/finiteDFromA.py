@@ -84,7 +84,7 @@ class FiniteDFromA(AB_dB_FieldBuilder):
             b_jac[:, j] = 0.5*(B1/B1norm - B0/B0norm) / self.hx
 
         # COMPUTE B_dagger
-        Bdag = B
+        Bdag = np.array(B)
         Bdag[0] += u*(b_jac[2, 1] - b_jac[1, 2])
         Bdag[1] += u*(b_jac[0, 2] - b_jac[2, 0])
         Bdag[2] += u*(b_jac[1, 0] - b_jac[0, 1])
