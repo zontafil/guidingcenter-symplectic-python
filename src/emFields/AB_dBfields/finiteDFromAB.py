@@ -4,6 +4,8 @@
 import numpy as np
 from emFields.AB_dBfields.AB_dBfield import ABdBGuidingCenter, AB_dB_FieldBuilder
 from emFields.ABfields.emFieldFactory import EMFieldFactory
+import matplotlib.pyplot as plt
+import matplotlib.cm as cm
 
 
 class FiniteDFromAB(AB_dB_FieldBuilder):
@@ -11,6 +13,10 @@ class FiniteDFromAB(AB_dB_FieldBuilder):
     def __init__(self, config):
         self.mu = config.mu
         self.hx = config.hx
+        self.drawZoomOut = 1.3
+        self.eps = 0.32
+        self.R0 = config.R0
+        self.k = 1.7
 
         self.field = EMFieldFactory(config.emField, config)
 
@@ -76,3 +82,43 @@ class FiniteDFromAB(AB_dB_FieldBuilder):
 
         return ABdBGuidingCenter(A=A, Adag_jac=Adag_jac, Adag=Adag, B=B,
                                  Bgrad=B_grad, b=b, Bnorm=Bnorm, BHessian=BHessian, Bdag=Bdag)
+
+    def draw_B(self):
+        nr = 20
+        nz = 20
+        minR = (1 - self.drawZoomOut*self.eps) * self.R0
+        maxR = (1 + self.drawZoomOut*self.eps) * self.R0
+        minZ = (-self.drawZoomOut*self.k*self.eps) * self.R0
+        maxZ = (self.drawZoomOut*self.k*self.eps) * self.R0
+        R = np.linspace(minR, maxR, nr)
+        Z = np.linspace(minZ, maxZ, nz)
+        RR, ZZ = np.meshgrid(R, Z)
+        BR = np.zeros([nr, nz])
+        Bp = np.zeros([nr, nz])
+        Bz = np.zeros([nr, nz])
+        for ir in range(nr):
+            for iz in range(nz):
+                # temp = self.compute(R[ir], Z[iz])
+                temp = self.compute(np.array([R[ir], 0, Z[iz], 0]))
+                print("{} {} {}".format(ir, iz, temp.B[0]))
+                BR[ir, iz] = temp.B[0]
+                Bp[ir, iz] = temp.B[1]
+                Bz[ir, iz] = temp.B[2]
+
+        fig, axs = plt.subplots(nrows=1, ncols=3, sharex=True)
+        ax = axs[0]
+        ax.contourf(RR, ZZ, BR.transpose(), 50, cmap=cm.hot)
+        ax.set_title('BR')
+        ax.set(xlabel="R [m]", ylabel="Z [m]")
+
+        ax = axs[1]
+        ax.contourf(RR, ZZ, Bp.transpose(), 50, cmap=cm.hot)
+        ax.set_title('Bphi')
+        ax.set(xlabel="R [m]", ylabel="Z [m]")
+
+        ax = axs[2]
+        ax.contourf(RR, ZZ, Bz.transpose(), 50, cmap=cm.hot)
+        ax.set_title('Bz')
+        ax.set(xlabel="R [m]", ylabel="Z [m]")
+
+        fig.show()
