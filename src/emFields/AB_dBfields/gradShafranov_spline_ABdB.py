@@ -1,6 +1,7 @@
 from emFields.eqdskReader.eqdskReader import EqdskReader
 from emFields.AB_dBfields.AB_dBfield import AB_dB_FieldBuilder, ABdBGuidingCenter
 import numpy as np
+import sys
 
 
 def cyl2cart(v, x):
@@ -12,10 +13,12 @@ def cyl2cart(v, x):
     return ret
 
 
-class GradShafranov_ABdB(AB_dB_FieldBuilder):
+class GradShafranov_Spline_ABdB(AB_dB_FieldBuilder):
     def __init__(self, config):
         self.eqdsk = EqdskReader(config.eqdskFile, config.psi_degree, config.f_degree)
         self.R0 = config.R0
+        self.B0 = config.B0
+        self.A0 = config.A0
         self.hx = config.hx
 
         print("EQDSK: range r: {} {}".format(self.eqdsk.r_min, self.eqdsk.r_max))
@@ -38,6 +41,7 @@ class GradShafranov_ABdB(AB_dB_FieldBuilder):
     def B_dB_cyl(self, R, Z):
 
         # interpolate psi and derivatives
+        psi = self.eqdsk.psi_spl(x=R, y=Z)[0][0]
         dpsi_dR = self.eqdsk.psi_spl(x=R, y=Z, dx=1, dy=0, grid=True)[0][0]
         dpsi_dz = self.eqdsk.psi_spl(x=R, y=Z, dx=0, dy=1, grid=True)[0][0]
         d2psi_dR2 = self.eqdsk.psi_spl(x=R, y=Z, dx=2, dy=0, grid=True)[0][0]
@@ -48,15 +52,21 @@ class GradShafranov_ABdB(AB_dB_FieldBuilder):
         d3psi_d3z = self.eqdsk.psi_spl(x=R, y=Z, dx=0, dy=3, grid=True)[0][0]
         d3psi_d3R = self.eqdsk.psi_spl(x=R, y=Z, dx=3, dy=0, grid=True)[0][0]
 
+        if psi > max(self.eqdsk.sibry, self.eqdsk.simag) or psi < min(self.eqdsk.sibry, self.eqdsk.simag) \
+           or Z > self.eqdsk.sepmaxz or Z < self.eqdsk.sepminz:
+            print("WARNING: outside main plasma. psi: {}, Z: {}, R: {}".format(psi, Z, R))
+
+            sys.exit(0)
+
         # evaluate the magnetic field
         BR = -dpsi_dz/R
-        Bp = -1 / R
+        Bp = self.B0 * self.R0 / R
         Bz = dpsi_dR/R
         # evaluate the derivatives
         dBR_dR = dpsi_dz/(R**2)-d2psi_dRdz/R
         dBR_dp = 0.
         dBR_dz = -d2psi_dz2/R
-        dBp_dR = 1/(R**2)
+        dBp_dR = - self.B0 * self.R0 / (R**2)
         dBp_dp = 0.
         dBp_dz = 0.
         dBz_dR = -dpsi_dR/(R**2) + d2psi_dR2/R
@@ -66,7 +76,7 @@ class GradShafranov_ABdB(AB_dB_FieldBuilder):
         d2BR_d2R = -2 * dpsi_dz / (R**3) + 2 * d2psi_dRdz / (R**2) - d3psi_d2Rdz / R
         d2BR_dRdz = d2psi_dz2 / (R**2) - d3psi_dRd2z / R
         d2BR_d2z = -d3psi_d3z / R
-        d2Bp_d2R = -2 / (R**3)
+        d2Bp_d2R = 2 * self.B0 * self.R0 / (R**3)
         d2Bp_dRdz = 0.
         d2Bp_d2z = 0.
         d2Bz_d2R = 2 * dpsi_dR / (R**3) - 2 * d2psi_dR2 / (R**2) + d3psi_d3R / R
@@ -79,7 +89,7 @@ class GradShafranov_ABdB(AB_dB_FieldBuilder):
                          dBz_dR, dBz_dp, dBz_dz,
                          d2BR_d2R, d2BR_dRdz, d2BR_d2z,
                          d2Bp_d2R, d2Bp_dRdz, d2Bp_d2z,
-                         d2Bz_d2R, d2Bz_dRdz, d2Bz_d2z])
+                         d2Bz_d2R, d2Bz_dRdz, d2Bz_d2z]) / self.A0
 
     def A(self, x):
         r = np.sqrt(x[0]**2 + x[1]**2)
@@ -91,7 +101,7 @@ class GradShafranov_ABdB(AB_dB_FieldBuilder):
         dpsi_dR = self.eqdsk.psi_spl(x=r, y=z, dx=1, dy=0, grid=True)[0][0]
         dpsi_dz = self.eqdsk.psi_spl(x=r, y=z, dx=0, dy=1, grid=True)[0][0]
 
-        Acyl = np.array([0, psi/r, np.log(r / self.R0)])
+        Acyl = np.array([0, psi/r, - self.B0 * self.R0 * np.log(r / self.R0)])
         A = cyl2cart(Acyl, x)
 
         # compute Ajac
@@ -101,14 +111,14 @@ class GradShafranov_ABdB(AB_dB_FieldBuilder):
         dAy_dr = - psi / r**2 * costheta + dpsi_dR / r * costheta
         dAy_dp = - psi / r**2 * sintheta
         dAy_dz = dpsi_dz / r * costheta
-        dAz_dr = 1 / r
+        dAz_dr = -self.B0 * self.R0 / r
         dAz_dp = 0
         dAz_dz = 0
         Ajac = np.zeros([3, 3])
         Ajac[0, :] = cyl2cart(np.array([dAx_dr, dAx_dp, dAx_dz]), x)
         Ajac[1, :] = cyl2cart(np.array([dAy_dr, dAy_dp, dAy_dz]), x)
         Ajac[2, :] = cyl2cart(np.array([dAz_dr, dAz_dp, dAz_dz]), x)
-        return [A, Ajac]
+        return [A / self.A0, Ajac / self.A0]
 
     """Compute the third derivative of the magnetic field at the given 4D position
 

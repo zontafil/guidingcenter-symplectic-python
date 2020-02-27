@@ -1,7 +1,7 @@
 from emFields.AB_dBfields.finiteDFromAB import FiniteDFromAB
 from emFields.AB_dBfields.splineField_BdB import SplineField_BdB
 from emFields.AB_dBfields.finiteDFromA import FiniteDFromA
-from emFields.AB_dBfields.gradShafranov_ABdB import GradShafranov_ABdB
+from emFields.AB_dBfields.gradShafranov_spline_ABdB import GradShafranov_Spline_ABdB
 from emFields.AB_dBfields.gradShafranov_analytic_ABdB import GradShafranov_analytic_AB
 from emFields.AB_dBfields.gradShafranov_analytic_ITER import ITERfield
 
@@ -12,7 +12,7 @@ def AB_dB_FieldFactory(fieldName, config):
     elif fieldName == "splineField":
         return SplineField_BdB(config)
     elif fieldName == "GradShafranovSplineABdB":
-        return GradShafranov_ABdB(config)
+        return GradShafranov_Spline_ABdB(config)
     elif fieldName == "GradShafranovAnalyticABdB":
         return GradShafranov_analytic_AB(config)
     elif fieldName == "finiteDFromA":
