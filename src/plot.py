@@ -77,6 +77,9 @@ y = []
 
 data = np.genfromtxt(inputFile, delimiter=' ', skip_header=0, names=True)
 
+if config.debugBfield:
+    dataB = np.genfromtxt(config.debugBfieldFile, delimiter=' ', skip_header=0, names=True)
+
 info = "timestep t/orbit: {} {}\n".format(config.h, config.stepsPerOrbit)
 info += "integrator: {}\n".format(config.integrator)
 info += "init bwN bwO: {} {} {}\n".format(config.initializationType,
@@ -106,7 +109,7 @@ ax[0, 1].scatter(data['r1'], data['z1'], s=0.1)
 # toroidal momentum
 ax[1, 0].set_ylim(set_axlims(data["p_phi"], 0.1))
 ax[1, 0].ticklabel_format(style="sci", axis="both", scilimits=(0, 0))
-ax[1, 0].set(xlabel="timestep", ylabel="p_phi")
+ax[1, 0].set(xlabel="timestep", ylabel="p_phi err")
 ax[1, 0].scatter(data['t'], data['p_phi'], s=0.1)
 
 # x
@@ -114,10 +117,10 @@ ax[1, 0].scatter(data['t'], data['p_phi'], s=0.1)
 # ax[1, 1].ticklabel_format(style="sci", axis="both", scilimits=(0, 0))
 # ax[1, 1].set(xlabel="timestep", ylabel="x1")
 # ax[1, 1].scatter(data['t'], data['x1'], s=0.1)
-ax[1, 1].set_ylim(set_axlims(data["r1"], 0.1))
+ax[1, 1].set_ylim(set_axlims(data["u1"], 0.1))
 ax[1, 1].ticklabel_format(style="sci", axis="both", scilimits=(0, 0))
-ax[1, 1].set(xlabel="timestep", ylabel="r1")
-ax[1, 1].scatter(data['t'], data['r1'], s=0.1)
+ax[1, 1].set(xlabel="timestep", ylabel="u1")
+ax[1, 1].scatter(data['t'], data['u1'], s=0.1)
 
 fig.text(0.99, 0.99, info, va="top", ha="right")
 plt.savefig(shortFilePrefix + "main.png", dpi=300)
@@ -146,7 +149,7 @@ plt.savefig(shortFilePrefix + "dE.png", dpi=200)
 fig, ax = plt.subplots(1, 1)
 ax.set_ylim(set_axlims(data["p_phi"], 0.1))
 ax.ticklabel_format(style="sci", axis="both", scilimits=(0, 0))
-ax.set(xlabel="timestep", ylabel="p_phi")
+ax.set(xlabel="timestep", ylabel="p_phi err")
 ax.scatter(data['t'], data['p_phi'], s=4, color="black")
 plt.savefig(shortFilePrefix + "pphi.png", dpi=200)
 
@@ -155,7 +158,23 @@ fig, ax = plt.subplots(1, 1)
 ax.set_ylim(set_axlims(data["z1"], 0.1))
 ax.set_xlim(set_axlims(data["r1"], 0.1))
 ax.ticklabel_format(style="sci", axis="both", scilimits=(0, 0))
-ax.set(xlabel="r", ylabel="z")
+ax.set(xlabel="r [m]", ylabel="z [m]")
 ax.scatter(data['r1'], data['z1'], s=4, color="black")
 plt.savefig(shortFilePrefix + "orbit.png", dpi=200)
 
+# energy & u
+if config.debugBfield:
+    fig, ax = plt.subplots(2, 2)
+    ax[0, 0].set_ylim(set_axlims(dataB["muB"], 0.1))
+    ax[0, 0].set_xlim(set_axlims(dataB["t"], 0.1))
+    ax[0, 0].ticklabel_format(style="sci", axis="both", scilimits=(0, 0))
+    ax[0, 0].set(xlabel="t", ylabel="mu*B")
+    ax[0, 0].scatter(dataB['t'], dataB['muB'], s=4, color="black")
+
+    ax[0, 1].set_ylim(set_axlims(dataB["05u2"], 0.1))
+    ax[0, 1].set_xlim(set_axlims(dataB["t"], 0.1))
+    ax[0, 1].ticklabel_format(style="sci", axis="both", scilimits=(0, 0))
+    ax[0, 1].set(xlabel="t", ylabel="1/2 u**2")
+    ax[0, 1].scatter(dataB['t'], dataB['05u2'], s=4, color="black")
+
+    plt.savefig(shortFilePrefix + "Benergy.png", dpi=200)

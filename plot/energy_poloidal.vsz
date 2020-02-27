@@ -1,5 +1,5 @@
 # Veusz saved document (version 3.1)
-# Saved at 2020-02-12T14:03:18.187009
+# Saved at 2020-02-25T20:17:00.191678
 
 AddImportPath(u'/home/filippo/Sorgenti/guiding-center-python/plot')
 ImportFileCSV(u'../../../out.txt', delimiter=u' ', headermode=u'1st', linked=True)
@@ -9,6 +9,7 @@ To(u'Energy_trajectory')
 Add('grid', name=u'grid1', autoadd=False)
 To(u'grid1')
 Set('rows', 2)
+Set('internalMargin', u'20pt')
 Add('graph', name=u'graph1', autoadd=False)
 To(u'graph1')
 Set('leftMargin', u'0cm')
@@ -63,6 +64,7 @@ Set('xData', u'r1')
 Set('yData', u'z1')
 Set('PlotLine/hide', True)
 Set('MarkerLine/color', u'darkred')
+Set('Label/hide', False)
 To('..')
 To('..')
 Add('graph', name=u'graph3', autoadd=False)
