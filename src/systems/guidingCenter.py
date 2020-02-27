@@ -29,8 +29,9 @@ class GuidingCenter(System):
 
         return p
 
-    def toroidalMomentum(self, z):
-        BdB = self.fieldBuilder.compute(z)
+    def toroidalMomentum(self, z, BdB=None):
+        if BdB is None:
+            BdB = self.fieldBuilder.compute(z)
         Adag = BdB.Adag
         r = np.sqrt(z[0]**2 + z[1]**2)
         sintheta = z[1] / r
@@ -38,9 +39,10 @@ class GuidingCenter(System):
         Adag_phi = - Adag[0] * sintheta + Adag[1] * costheta
         return r * Adag_phi
 
-    def hamiltonian(self, z):
+    def hamiltonian(self, z, ABdB=None):
         # guiding center hamiltonian
-        ABdB = self.fieldBuilder.compute(z)
+        if ABdB is None:
+            ABdB = self.fieldBuilder.compute(z)
         return (0.5*z[3]**2 + self.config.mu * ABdB.Bnorm)
 
     def lagrangian(self, z, v):

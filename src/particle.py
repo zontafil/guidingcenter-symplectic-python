@@ -45,9 +45,10 @@ class Particle:
         return np.sqrt(self.z0[0]**2 + self.z0[1]**2)
 
     def computeEnergyError(self):
-        self.E1 = self.integrator.system.hamiltonian(self.z1)
+        BdB1 = self.integrator.system.fieldBuilder.compute(self.z1)
+        self.E1 = self.integrator.system.hamiltonian(self.z1, BdB1)
         self.dE1 = (self.E1 - self.Einit) / self.Einit
-        self.pphi1 = self.integrator.system.toroidalMomentum(self.z1)
+        self.pphi1 = self.integrator.system.toroidalMomentum(self.z1, BdB1)
         self.dpphi1 = (self.pphi1 - self.pphi_init) / self.pphi_init
 
     def stepForward(self, t):
