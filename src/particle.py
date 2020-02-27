@@ -18,6 +18,7 @@ class Particle:
         self.config = config
         self.integrator = integratorFactory(config.integrator, config)
         self.h = config.h
+        self.system = systemFactory(config.system, config)
 
         # init particle initial conditions
         self.z1 = z1
@@ -39,6 +40,8 @@ class Particle:
     def computeEnergyError(self):
         self.E1 = self.integrator.system.hamiltonian(self.z1)
         self.dE1 = (self.E1 - self.Einit) / self.Einit
+        self.pphi1 = self.integrator.system.toroidalMomentum(self.z1)
+        self.dpphi1 = (self.pphi1 - self.pphi_init) / self.pphi_init
 
     def stepForward(self, t):
         # compute next time step
@@ -49,6 +52,8 @@ class Particle:
         self.p0 = self.p1
         self.dE0 = self.dE1
         self.E0 = self.E1
+        self.dpphi0 = self.dpphi1
+        self.pphi0 = self.pphi1
         self.z1 = points.z2
         self.p1 = points.p2 if points.p2 is not None else np.zeros(4)
 
@@ -117,6 +122,8 @@ class Particle:
 
         # compute initial energy
         self.Einit = self.integrator.system.hamiltonian(self.z0)
+        self.pphi_init = self.integrator.system.toroidalMomentum(self.z0)
+        self.pphi0 = self.pphi_init
         self.E0 = self.Einit
         self.dE0 = 0
         self.computeEnergyError()
@@ -130,6 +137,8 @@ class Particle:
         # backup initial energy
         E0 = self.E0
         dE0 = self.dE0
+        pphi_init = self.pphi_init
+        pphi0 = self.pphi0
 
         even_points = np.zeros([order, 4])
         ts = np.zeros(order)
@@ -150,6 +159,8 @@ class Particle:
         self.z0 = np.array(even_points[0, :])
         self.E0 = E0
         self.dE0 = dE0
+        self.pphi_init = pphi_init
+        self.pphi0 = pphi0
 
         if hasattr(self.integrator.__class__, "legendreLeft"):
             self.p0 = self.integrator.legendreLeft(self.z0, self.z1, self.h)

@@ -29,6 +29,15 @@ class GuidingCenter(System):
 
         return p
 
+    def toroidalMomentum(self, z):
+        BdB = self.fieldBuilder.compute(z)
+        Adag = BdB.Adag
+        r = np.sqrt(z[0]**2 + z[1]**2)
+        sintheta = z[1] / r
+        costheta = z[0] / r
+        Adag_phi = - Adag[0] * sintheta + Adag[1] * costheta
+        return r * Adag_phi
+
     def hamiltonian(self, z):
         # guiding center hamiltonian
         ABdB = self.fieldBuilder.compute(z)
