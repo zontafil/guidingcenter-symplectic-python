@@ -4,6 +4,8 @@ from particleUtils import z0z1p0p1
 import numpy as np
 from systems.systemFactory import systemFactory
 from scipy.interpolate import KroghInterpolator
+import matplotlib.pyplot as plt
+import sys
 
 
 class InitializationType(Enum):
@@ -20,6 +22,12 @@ class Particle:
         self.h = config.h
         self.system = systemFactory(config.system, config)
 
+        if config.drawBandPsi:
+            self.system.fieldBuilder.draw_B()
+            self.system.fieldBuilder.draw_psirz()
+            plt.show()
+            sys.exit(0)
+
         # init particle initial conditions
         self.z1 = z1
         self.z0 = z0
@@ -27,9 +35,8 @@ class Particle:
         self.p0 = p0 if p0 is not None else np.zeros(4)
 
         if config.debugBfield:
-            self.system = systemFactory(config.system, config)
-            self.Bout = open("./Bdebug.txt", "w+")
-            self.Bout.write("t Ax Ay Az Bx By Bz Bxx Bxy Bxz Byx Byy Byz Bzx Bzy Bzz\n")
+            self.Bout = open(config.debugBfieldFile, "w+")
+            self.Bout.write("t muB 05u2 Ax Ay Az Bx By Bz Bxx Bxy Bxz Byx Byy Byz Bzx Bzy Bzz\n")
 
     def r1(self):
         return np.sqrt(self.z1[0]**2 + self.z1[1]**2)
@@ -60,11 +67,12 @@ class Particle:
         # print magnetic field along the particle orbit
         if self.config.debugBfield:
             field = self.system.fieldBuilder.compute(points.z2)
-            self.Bout.write("{} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {}\n".format(t,
+            self.Bout.write("{} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {}\n".format(t,
+                            self.config.mu * field.Bnorm, 0.5 * self.z1[3]**2,
                             field.A[0], field.A[1], field.A[2], field.B[0], field.B[1], field.B[2],
-                            field.BHessian[0][0], field.BHessian[0][1], field.BHessian[0,2],
-                            field.BHessian[1][0], field.BHessian[1][1], field.BHessian[1,2],
-                            field.BHessian[2][0], field.BHessian[2][1], field.BHessian[2,2]))
+                            field.BHessian[0][0], field.BHessian[0][1], field.BHessian[0, 2],
+                            field.BHessian[1][0], field.BHessian[1][1], field.BHessian[1, 2],
+                            field.BHessian[2][0], field.BHessian[2][1], field.BHessian[2, 2]))
 
         # compute conserved quantitiesEerr0
         self.computeEnergyError()
