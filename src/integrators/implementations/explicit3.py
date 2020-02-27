@@ -5,7 +5,6 @@ from integrators.variationalIntegrators.variationalIntegrator import Variational
 
 class SymplecticExplicit3(VariationalIntegrator):
     def __init__(self, config):
-        self.mu = config.mu
         super().__init__(config)
 
     def legendreRight(self, z0, z1, h):
@@ -42,7 +41,7 @@ class SymplecticExplicit3(VariationalIntegrator):
         dq = z1 - z0
         Q = np.dot(M, dq)
 
-        p1[:3] = Q[:3] + field.Adag - h / 2.*self.mu*field.Bgrad
+        p1[:3] = Q[:3] + field.Adag - h / 2.*self.config.mu*field.Bgrad
         p1[3] = Q[3] - h/2.*z1[3]
 
         return p1
@@ -84,7 +83,7 @@ class SymplecticExplicit3(VariationalIntegrator):
         M /= 2.
 
         # BUILD W
-        W[:3] = h/2.*(self.mu*field.Bgrad) + field.Adag - p1[:3]
+        W[:3] = h/2.*(self.config.mu*field.Bgrad) + field.Adag - p1[:3]
         W[3] = h/2.*z1[3] - p1[3]
 
         Q = np.dot(np.linalg.inv(M), W)

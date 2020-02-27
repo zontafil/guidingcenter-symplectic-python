@@ -5,7 +5,7 @@ import numpy as np
 class SymplecticExplicit4_ThirdOrder(ImplicitIntegrator):
     def __init__(self, config):
         super().__init__(config)
-        self.mu = self.config.mu
+        self.config = config
 
     def f(self, z0, z1, z2, h):
 
@@ -32,15 +32,15 @@ class SymplecticExplicit4_ThirdOrder(ImplicitIntegrator):
         omega1[3, 2] = - ABdB.b[2]
 
         Hd1 = np.zeros(4)
-        Hd1[:3] = self.mu * ABdB.Bgrad
+        Hd1[:3] = self.config.mu * ABdB.Bgrad
         Hd1[3] = z1[3]
 
         Hd2 = np.zeros([4, 4])
-        Hd2[:3, :3] = self.mu*BHessian
+        Hd2[:3, :3] = self.config.mu*BHessian
         Hd2[3, 3] = 1.
 
         Hd3 = np.zeros([4, 4, 4])
-        Hd3[:3, :3, :3] = self.mu * d3B
+        Hd3[:3, :3, :3] = self.config.mu * d3B
 
         ret = 0.5 * np.dot(omega1, z2 - z0)
         ret += h * Hd1

@@ -11,7 +11,6 @@ import matplotlib.cm as cm
 class FiniteDFromAB(AB_dB_FieldBuilder):
 
     def __init__(self, config):
-        self.mu = config.mu
         self.hx = config.hx
         self.drawZoomOut = 1.3
         self.eps = 0.32

@@ -5,7 +5,7 @@ from integrators.variationalIntegrators.variationalIntegrator import Variational
 
 class SymplecticExplicit4(VariationalIntegrator):
     def __init__(self, config):
-        self.mu = config.mu
+        self.config = config
         super().__init__(config)
 
     def legendreRight(self, z0, z1, h):
@@ -31,7 +31,7 @@ class SymplecticExplicit4(VariationalIntegrator):
         M[0, 0] = M[1, 1] = M[2, 2] = M[3, 3] = 0
 
         grad2h = np.zeros([4, 4])
-        grad2h[:3, :3] = self.mu*field.BHessian
+        grad2h[:3, :3] = self.config.mu*field.BHessian
         grad2h[3, 3] = 1.
         M += h/2. * grad2h
 
@@ -41,7 +41,7 @@ class SymplecticExplicit4(VariationalIntegrator):
         Q = np.dot(M, dq)
 
         p1 = np.zeros(4)
-        p1[:3] = Q[:3] + field.Adag - h/2.*self.mu*field.Bgrad
+        p1[:3] = Q[:3] + field.Adag - h/2.*self.config.mu*field.Bgrad
         p1[3] = Q[3] - h/2.*z1[3]
 
         return p1
@@ -72,14 +72,14 @@ class SymplecticExplicit4(VariationalIntegrator):
         M[0, 0] = M[1, 1] = M[2, 2] = M[3, 3] = 0
 
         grad2h = np.zeros([4, 4])
-        grad2h[:3, :3] = self.mu*field.BHessian
+        grad2h[:3, :3] = self.config.mu*field.BHessian
         grad2h[3, 3] = 1.
         M -= h/2. * grad2h
 
         M /= 2.
 
         # BUILD W
-        W[:3] = h/2.*(self.mu*field.Bgrad) + field.Adag - p1[:3]
+        W[:3] = h/2.*(self.config.mu*field.Bgrad) + field.Adag - p1[:3]
         W[3] = (h/2.*z1[3] - p1[3])
 
         Q = np.dot(np.linalg.inv(M), W)

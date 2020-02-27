@@ -30,6 +30,7 @@ print("Time step: ", config.h)
 print("Initialization: ")
 print("z_init: " + str(particle.z0))
 print("z0: " + str(particle.z1))
+print("mu_0: " + str(config.mu))
 
 # open output file
 out = open(outFile, "w+")

@@ -6,7 +6,7 @@ import numpy as np
 class SymplecticExplicit4_GaugeFree(Integrator):
     def __init__(self, config):
         super().__init__(config)
-        self.mu = self.config.mu
+        self.config = config
         # self.file = open("bhes.txt", "w+")
 
     def stepForward(self, points, h):
@@ -74,11 +74,11 @@ class SymplecticExplicit4_GaugeFree(Integrator):
         omega1[3, 2] = - ABdB.b[2]
 
         Hd1 = np.zeros(4)
-        Hd1[:3] = self.mu * ABdB.Bgrad
+        Hd1[:3] = self.config.mu * ABdB.Bgrad
         Hd1[3] = z1[3]
 
         Hd2 = np.zeros([4, 4])
-        Hd2[:3, :3] = self.mu*BHessian
+        Hd2[:3, :3] = self.config.mu*BHessian
         Hd2[3, 3] = 1.
 
         M = omega1 / 2. + h / 4. * Hd2

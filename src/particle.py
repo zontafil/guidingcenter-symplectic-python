@@ -66,6 +66,12 @@ class Particle:
 
     def initialize(self, init_type):
 
+        # compute initial u0 and mu0 from pitch and total initial velocity
+        if self.config.computeMuVfromPitch:
+            field = self.system.fieldBuilder.compute(self.z0)
+            self.config.mu = self.config.v0**2 / 2 / field.Bnorm * (1 - self.config.pitch**2)
+            self.z0[3] = self.config.pitch * self.config.v0
+
         # initialize the particle
         if init_type == InitializationType.LAGRANGIAN:
             # initialize the particle with the help of an auxiliary integrator,
