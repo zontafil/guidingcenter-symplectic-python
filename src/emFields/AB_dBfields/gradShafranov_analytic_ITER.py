@@ -7,6 +7,7 @@ import collections
 from emFields.AB_dBfields.AB_dBfield import AB_dB_FieldBuilder, ABdBGuidingCenter
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
+import sys
 
 
 SolovevParams = collections.namedtuple("SolovevParams", "A eps delta alpha k")
@@ -29,12 +30,14 @@ class ITERfield(AB_dB_FieldBuilder):
     def __init__(self, config):
         self.R0 = config.R0
         self.hx = config.hx
+        self.B0 = config.B0
+        self.psi0 = config.psi0
+        self.A0 = config.A0
 
         self.drawZoomOut = 1.3
         self.computeCoeff()
-        # self.draw_B()
-        # self.draw_psirz()
-        # plt.show()
+
+        print("c {}".format(self.c))
 
     def computeCoeff(self):
 
@@ -138,50 +141,83 @@ class ITERfield(AB_dB_FieldBuilder):
     def dpsiyyy(self, x, y, c):
         return 48*c[4]*y + 192*c[5]*x**2*y + c[6]*(-3360*x**2*y + 960*y**3 - 2880*x**2*y*np.log(x))
 
-    def psi(self, x, y):
-        return self.psiC(x, y, self.c)
+    def psiNormUnits(self, x, y):
+        ret = self.psiC(x, y, self.c)
+        if ret > 0:
+            print("WARNING: outside plasma boundary")
+            sys.exit(0)
+        return ret
 
-    def A(self, x):
-        r = np.sqrt(x[0]**2 + x[1]**2)
-        z = x[2]
-        sintheta = x[1] / r
-        costheta = x[0] / r
+    def psi(self, R, Z):
+        x = R / self.R0
+        y = Z / self.R0
+        return self.psi0 * self.psiNormUnits(x, y)
 
-        psi = self.psi(r, z)
-        dpsi_dR = self.dpsix(r, z, self.c)
-        dpsi_dz = self.dpsiy(r, z, self.c)
+    def AAjac(self, x):
+        R = np.sqrt(x[0]**2 + x[1]**2)
+        Z = x[2]
 
-        Acyl = np.array([0, psi/r, np.log(r / self.R0)])
+        r = R / self.R0
+        z = Z / self.R0
+
+        sintheta = x[1] / R
+        costheta = x[0] / R
+
+        psi = self.psi(R, Z)
+        dpsi_dR = self.psi0 * self.dpsix(r, z, self.c) / self.R0
+        dpsi_dz = self.psi0 * self.dpsiy(r, z, self.c) / self.R0
+
+        Acyl = np.array([0, psi/R, np.log(R / self.R0)])
         A = cyl2cart(Acyl, x)
 
         # compute Ajac
-        dAx_dr = psi / r**2 * sintheta - dpsi_dR / r * sintheta
-        dAx_dp = - psi / r**2 * costheta
-        dAx_dz = - dpsi_dz / r * sintheta
-        dAy_dr = - psi / r**2 * costheta + dpsi_dR / r * costheta
-        dAy_dp = - psi / r**2 * sintheta
-        dAy_dz = dpsi_dz / r * costheta
-        dAz_dr = 1 / r
+        dAx_dr = psi / R**2 * sintheta - dpsi_dR / R * sintheta
+        dAx_dp = - psi / R**2 * costheta
+        dAx_dz = - dpsi_dz / R * sintheta
+        dAy_dr = - psi / R**2 * costheta + dpsi_dR / R * costheta
+        dAy_dp = - psi / R**2 * sintheta
+        dAy_dz = dpsi_dz / R * costheta
+        dAz_dr = 1 / R
         dAz_dp = 0
         dAz_dz = 0
         Ajac = np.zeros([3, 3])
         Ajac[0, :] = cyl2cart(np.array([dAx_dr, dAx_dp, dAx_dz]), x)
         Ajac[1, :] = cyl2cart(np.array([dAy_dr, dAy_dp, dAy_dz]), x)
         Ajac[2, :] = cyl2cart(np.array([dAz_dr, dAz_dp, dAz_dz]), x)
-        return [A, Ajac]
+        return [A / self.A0, Ajac / self.A0]
+
+    def A(self, x):
+        R = np.sqrt(x[0]**2 + x[1]**2)
+        Z = x[2]
+
+        psi = self.psi(R, Z)
+
+        Acyl = np.array([0, psi/R, - self.B0 * self.R0 * np.log(R / self.R0)])
+        A = cyl2cart(Acyl, x)
+
+        return A / self.A0
 
     def B(self, x):
         R = np.sqrt(x[0]**2 + x[1]**2)
         Z = x[2]
-        dpsi_dR = self.dpsix(R, Z, self.c)
-        dpsi_dz = self.dpsiy(R, Z, self.c)
+
+        # psi = self.psi(R, Z)
+
+        r = R / self.R0
+        z = Z / self.R0
+
+        dpsi_dR = self.psi0 * self.dpsix(r, z, self.c) / self.R0
+        dpsi_dz = self.psi0 * self.dpsiy(r, z, self.c) / self.R0
+
+        # F = np.sqrt(psi * self.Acoeff) / self.R0
 
         curlA_cyl = np.zeros(3)
         curlA_cyl[0] = - dpsi_dz / R
-        curlA_cyl[1] = - 1 / R
+        curlA_cyl[1] = self.R0 * self.B0 / R
+        # curlA_cyl[1] = F / R
         curlA_cyl[2] = dpsi_dR / R
 
-        return cyl2cart(curlA_cyl, x)
+        return cyl2cart(curlA_cyl, x) / self.A0
 
     def BHessian(self, z):
         ret = np.zeros([3, 3])
@@ -201,26 +237,29 @@ class ITERfield(AB_dB_FieldBuilder):
 
     def B_dB_cyl(self, R, Z):
 
+        r = R / self.R0
+        z = Z / self.R0
+
         # interpolate psi and derivatives
-        dpsi_dR = self.dpsix(R, Z, self.c)
-        dpsi_dz = self.dpsiy(R, Z, self.c)
-        d2psi_dR2 = self.dpsixx(R, Z, self.c)
-        d2psi_dRdz = self.dpsixy(R, Z, self.c)
-        d2psi_dz2 = self.dpsiyy(R, Z, self.c)
-        d3psi_d2Rdz = self.dpsixxy(R, Z, self.c)
-        d3psi_dRd2z = self.dpsixyy(R, Z, self.c)
-        d3psi_d3z = self.dpsiyyy(R, Z, self.c)
-        d3psi_d3R = self.dpsixxx(R, Z, self.c)
+        dpsi_dR = self.psi0 * self.dpsix(r, z, self.c) / self.R0
+        dpsi_dz = self.psi0 * self.dpsiy(r, z, self.c) / self.R0
+        d2psi_dR2 = self.psi0 * self.dpsixx(r, z, self.c) / self.R0**2
+        d2psi_dRdz = self.psi0 * self.dpsixy(r, z, self.c) / self.R0**2
+        d2psi_dz2 = self.psi0 * self.dpsiyy(r, z, self.c) / self.R0**2
+        d3psi_d2Rdz = self.psi0 * self.dpsixxy(r, z, self.c) / self.R0**3
+        d3psi_dRd2z = self.psi0 * self.dpsixyy(r, z, self.c) / self.R0**3
+        d3psi_d3z = self.psi0 * self.dpsiyyy(r, z, self.c) / self.R0**3
+        d3psi_d3R = self.psi0 * self.dpsixxx(r, z, self.c) / self.R0**3
 
         # evaluate the magnetic field
         BR = -dpsi_dz/R
-        Bp = -1 / R
+        Bp = self.R0*self.B0 / R
         Bz = dpsi_dR/R
         # evaluate the derivatives
         dBR_dR = dpsi_dz/(R**2)-d2psi_dRdz/R
         dBR_dp = 0.
         dBR_dz = -d2psi_dz2/R
-        dBp_dR = 1/(R**2)
+        dBp_dR = -self.R0*self.B0/(R**2)
         dBp_dp = 0.
         dBp_dz = 0.
         dBz_dR = -dpsi_dR/(R**2) + d2psi_dR2/R
@@ -230,7 +269,7 @@ class ITERfield(AB_dB_FieldBuilder):
         d2BR_d2R = -2 * dpsi_dz / (R**3) + 2 * d2psi_dRdz / (R**2) - d3psi_d2Rdz / R
         d2BR_dRdz = d2psi_dz2 / (R**2) - d3psi_dRd2z / R
         d2BR_d2z = -d3psi_d3z / R
-        d2Bp_d2R = -2 / (R**3)
+        d2Bp_d2R = 2 * self.R0 * self.B0 / (R**3)
         d2Bp_dRdz = 0.
         d2Bp_d2z = 0.
         d2Bz_d2R = 2 * dpsi_dR / (R**3) - 2 * d2psi_dR2 / (R**2) + d3psi_d3R / R
@@ -243,14 +282,17 @@ class ITERfield(AB_dB_FieldBuilder):
                          dBz_dR, dBz_dp, dBz_dz,
                          d2BR_d2R, d2BR_dRdz, d2BR_d2z,
                          d2Bp_d2R, d2Bp_dRdz, d2Bp_d2z,
-                         d2Bz_d2R, d2Bz_dRdz, d2Bz_d2z])
+                         d2Bz_d2R, d2Bz_dRdz, d2Bz_d2z]) / self.A0
 
     def draw_psirz(self):
-        nr = 100
-        nz = 100
-        R = np.linspace(1 - self.drawZoomOut*self.eps, 1 + self.drawZoomOut*self.eps, nr)
-        Z = np.linspace(-self.drawZoomOut*self.k*self.eps,
-                        self.drawZoomOut*self.k*self.eps, nz)
+        nr = 50
+        nz = 50
+        minR = (1 - self.drawZoomOut*self.eps) * self.R0
+        maxR = (1 + self.drawZoomOut*self.eps) * self.R0
+        minZ = (-self.drawZoomOut*self.k*self.eps) * self.R0
+        maxZ = (self.drawZoomOut*self.k*self.eps) * self.R0
+        R = np.linspace(minR, maxR, nr)
+        Z = np.linspace(minZ, maxZ, nz)
         RR, ZZ = np.meshgrid(R, Z)
         psi = np.zeros([nr, nz])
         for ir in range(nr):
@@ -261,18 +303,22 @@ class ITERfield(AB_dB_FieldBuilder):
         cpf = ax.contourf(RR, ZZ, psi.transpose(), 50, cmap=cm.hot)
         colours = ['k' if level < 0 else 'w' for level in cpf.levels]
         cp = ax.contour(RR, ZZ, psi.transpose(), 50, colors=colours)
-        ax.clabel(cp, fontsize=12, colors=colours)
+        # ax.clabel(cp, fontsize=12, colors=colours)
         ax.axis('scaled')
+        ax.set(xlabel="R [m]", ylabel="Z [m]")
         # ax.plot(self.rlim, self.zlim, c='k', linewidth=2.0)
         # ax.plot(self.rbbbs, self.zbbbs, c='k', linewidth=2.0)
         fig.show()
 
     def draw_B(self):
-        nr = 100
-        nz = 100
-        R = np.linspace(1 - self.drawZoomOut*self.eps, 1 + self.drawZoomOut*self.eps, nr)
-        Z = np.linspace(-self.drawZoomOut*self.k*self.eps,
-                        self.drawZoomOut*self.k*self.eps, nz)
+        nr = 10
+        nz = 10
+        minR = (1 - self.drawZoomOut*self.eps) * self.R0
+        maxR = (1 + self.drawZoomOut*self.eps) * self.R0
+        minZ = (-self.drawZoomOut*self.k*self.eps) * self.R0
+        maxZ = (self.drawZoomOut*self.k*self.eps) * self.R0
+        R = np.linspace(minR, maxR, nr)
+        Z = np.linspace(minZ, maxZ, nz)
         RR, ZZ = np.meshgrid(R, Z)
         BR = np.zeros([nr, nz])
         Bp = np.zeros([nr, nz])
@@ -280,22 +326,42 @@ class ITERfield(AB_dB_FieldBuilder):
         for ir in range(nr):
             for iz in range(nz):
                 temp = self.B_dB_cyl(R[ir], Z[iz])
+                # print("{} {} {}".format(R[ir], Z[iz], temp[0]))
                 BR[ir, iz] = temp[0]
                 Bp[ir, iz] = temp[1]
                 Bz[ir, iz] = temp[2]
 
+                # temp = self.compute(np.array([R[ir], 0, Z[iz], 0]))
+                # # print("{} {} {}".format(R[ir], Z[iz], temp.B[0]))
+                # BR[ir, iz] = temp.Bcyl[0]
+                # Bp[ir, iz] = temp.Bcyl[1]
+                # Bz[ir, iz] = temp.Bcyl[2]
+
         fig, axs = plt.subplots(nrows=1, ncols=3, sharex=True)
         ax = axs[0]
-        ax.contourf(RR, ZZ, BR.transpose(), 20, cmap=cm.hot)
+        cpf = ax.contourf(RR, ZZ, BR.transpose(), 50, cmap=cm.hot)
+        colours = ['k' if level < 0 else 'w' for level in cpf.levels]
+        # cp = ax.contour(RR, ZZ, BR.transpose(), 20, colors=colours)
+        # ax.clabel(cp, fontsize=12, colors=colours)
         ax.set_title('BR')
+        ax.set(xlabel="R [m]", ylabel="Z [m]")
+
 
         ax = axs[1]
-        ax.contourf(RR, ZZ, Bp.transpose(), 50, cmap=cm.hot)
+        cpf = ax.contourf(RR, ZZ, Bp.transpose(), 50, cmap=cm.hot)
+        colours = ['k' if level < 0 else 'w' for level in cpf.levels]
+        # cp = ax.contour(RR, ZZ, Bp.transpose(), 20, colors=colours)
+        # ax.clabel(cp, fontsize=12, colors=colours)
         ax.set_title('Bphi')
+        ax.set(xlabel="R [m]", ylabel="Z [m]")
 
         ax = axs[2]
-        ax.contourf(RR, ZZ, Bz.transpose(), 50, cmap=cm.hot)
+        cpf = ax.contourf(RR, ZZ, Bz.transpose(), 50, cmap=cm.hot)
+        colours = ['k' if level < 0 else 'w' for level in cpf.levels]
+        # cp = ax.contour(RR, ZZ, Bz.transpose(), 20, colors=colours)
+        # ax.clabel(cp, fontsize=12, colors=colours)
         ax.set_title('Bz')
+        ax.set(xlabel="R [m]", ylabel="Z [m]")
 
         fig.show()
 
@@ -336,7 +402,7 @@ class ITERfield(AB_dB_FieldBuilder):
         Bnorm = np.linalg.norm(B)
         b = B / Bnorm
 
-        A_Ajac = self.A(x)
+        A_Ajac = self.AAjac(x)
         A = A_Ajac[0]
         Ajac = A_Ajac[1]
         Adag = A + u * b
