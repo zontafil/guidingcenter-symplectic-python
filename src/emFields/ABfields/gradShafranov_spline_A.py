@@ -3,6 +3,7 @@
 from emFields.ABfields.emField import EMField
 import numpy as np
 from emFields.eqdskReader.eqdskReader import EqdskReader
+import sys
 
 
 def cyl2cart(v, x):
@@ -30,7 +31,13 @@ class GradShafranovSplineA(EMField):
         z = x[2]
         psi = self.eqdsk.psi_spl(x=r, y=z)[0][0]
 
-        Acyl = np.array([0, psi/r, np.log(r / self.R0)])
+        if psi > max(self.eqdsk.sibry, self.eqdsk.simag) or psi < min(self.eqdsk.sibry, self.eqdsk.simag) \
+           or z > self.eqdsk.sepmaxz or z < self.eqdsk.sepminz:
+            print("WARNING: outside main plasma. psi: {}, Z: {}, R: {}".format(psi, z, r))
+
+            sys.exit(0)
+
+        Acyl = np.array([0, psi/r, -self.B0 * self.R0 * np.log(r / self.R0)])
         return cyl2cart(Acyl, x)
 
     def B(self, x):
