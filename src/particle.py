@@ -13,6 +13,7 @@ class InitializationType(Enum):
     LAGRANGIAN = 1
     HAMILTONIAN = 2
     MANUAL_Z0Z1 = 3
+    SIXD_PAULI = 4
 
 
 class Particle:
@@ -140,6 +141,28 @@ class Particle:
             if hasattr(self.integrator.__class__, "legendreRight"):
                 self.p1 = self.integrator.legendreRight(self.z0, self.z1, self.h)
 
+        elif init_type == InitializationType.SIXD_PAULI:
+            auxiliaryIntegrator = integratorFactory(self.config.auxiliaryIntegrator, self.config)
+
+            z0 = np.array(self.z0)
+            for i in range(100):
+                points = z0z1p0p1(z1=z0, z0=None, p0=None, p1=None)
+                points = auxiliaryIntegrator.stepForward(points, self.h / 100)
+                z0 = points.z2
+            self.z1 = z0
+            self.z1 = self.z0
+
+            # z0 = np.array(self.z0)
+            # for i in range(50):
+            #     points = z0z1p0p1(z1=z0, z0=None, p0=None, p1=None)
+            #     points = auxiliaryIntegrator.stepForward(points, self.h / 50)
+            #     z0 = points.z2
+            vpar = z0[3]
+            field = self.system.fieldBuilder.compute(z0)
+            vpar = self.z0[3]
+            field = self.system.fieldBuilder.compute(self.z0)
+
+            self.p1[:3] = field.b * vpar
         # compute initial energy
         self.Einit = self.integrator.system.hamiltonian(self.z0)
         self.pphi_init = self.integrator.system.toroidalMomentum(self.z0)
