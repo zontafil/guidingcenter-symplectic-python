@@ -19,8 +19,8 @@ class Particle:
     def __init__(self, config, z0, p0, z1, p1):
         self.config = config
         self.integrator = integratorFactory(config.integrator, config)
-        self.h = config.h
         self.system = systemFactory(config.system, config)
+        self.c = 2.998E8
 
         if config.drawBandPsi:
             self.system.fieldBuilder.draw_B()
@@ -33,6 +33,23 @@ class Particle:
         self.z0 = z0
         self.p1 = p1 if p1 is not None else np.zeros(4)
         self.p0 = p0 if p0 is not None else np.zeros(4)
+
+        # compute initial u0 and mu0 from pitch and total initial velocity
+        if self.config.computeMuVfromPitch:
+            self.config.v0 = np.sqrt(self.config.E0 * 1000. / 6.241509e18 * 2. / self.config.m) / self.c
+            field = self.system.fieldBuilder.compute(self.z0)
+            self.config.mu = self.config.v0**2 / 2 / field.Bnorm * (1 - self.config.pitch**2)
+            self.z0[3] = self.config.pitch * self.config.v0
+
+            A0 = self.config.m*self.c/self.config.q  # 1.7E-3, A_norm = A / A0
+            B_real = field.Bnorm * A0
+            larm_w = self.config.q * B_real / self.config.m
+            larm_T = 2. * 3.14 / larm_w
+            print("larmor period {}".format(larm_T))
+            print("B {}".format(B_real))
+
+        # normalize variables
+        self.h = self.config.h * self.c
 
         if config.debugBfield:
             self.Bout = open(config.debugBfieldFile, "w+")
@@ -79,12 +96,6 @@ class Particle:
         self.computeEnergyError()
 
     def initialize(self, init_type):
-
-        # compute initial u0 and mu0 from pitch and total initial velocity
-        if self.config.computeMuVfromPitch:
-            field = self.system.fieldBuilder.compute(self.z0)
-            self.config.mu = self.config.v0**2 / 2 / field.Bnorm * (1 - self.config.pitch**2)
-            self.z0[3] = self.config.pitch * self.config.v0
 
         # initialize the particle
         if init_type == InitializationType.LAGRANGIAN:
@@ -133,6 +144,7 @@ class Particle:
         self.Einit = self.integrator.system.hamiltonian(self.z0)
         self.pphi_init = self.integrator.system.toroidalMomentum(self.z0)
         self.pphi0 = self.pphi_init
+        self.dpphi0 = self.pphi_init
         self.E0 = self.Einit
         self.dE0 = 0
         self.computeEnergyError()

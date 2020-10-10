@@ -18,8 +18,9 @@ class GradShafranov_Spline_ABdB(AB_dB_FieldBuilder):
         self.eqdsk = EqdskReader(config.eqdskFile, config.psi_degree, config.f_degree)
         self.R0 = config.R0
         self.B0 = config.B0
-        self.A0 = config.A0
         self.hx = config.hx
+        self.c = 2.998E8
+        self.A0 = config.m*self.c/config.q  # 1.7E-3, A_norm = A / A0
 
         print("EQDSK: range r: {} {}".format(self.eqdsk.r_min, self.eqdsk.r_max))
         print("EQDSK: range z: {} {}".format(self.eqdsk.z_min, self.eqdsk.z_max))

@@ -32,13 +32,13 @@ def printToFile(t, config, particle, out, timestep0=False):
         z = particle.z0
         p_str = ' '.join(map(str, particle.p0))
         dE = particle.dE0
-        E = particle.E0
+        # E = particle.E0
         dpphi = particle.dpphi0
     else:
         z = particle.z1
         p_str = ' '.join(map(str, particle.p1))
         dE = particle.dE1
-        E = particle.E1
+        # E = particle.E1
         dpphi = particle.dpphi1
     z_str = ' '.join(map(str, z))
 

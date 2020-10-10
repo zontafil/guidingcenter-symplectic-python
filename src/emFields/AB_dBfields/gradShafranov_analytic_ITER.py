@@ -32,7 +32,8 @@ class ITERfield(AB_dB_FieldBuilder):
         self.hx = config.hx
         self.B0 = config.B0
         self.psi0 = config.psi0
-        self.A0 = config.A0
+        self.speedlight = 2.998E8
+        self.A0 = config.m*self.speedlight/config.q  # 1.7E-3, A_norm = A / A0
 
         self.drawZoomOut = 1.3
         self.computeCoeff()
