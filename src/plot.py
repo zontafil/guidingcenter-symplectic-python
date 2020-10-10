@@ -65,10 +65,10 @@ elif config.initializationType == InitializationType.MANUAL:
 else:
     init = config.initializationType
 
-longFilePrefix += "h{}_{}{}{}_{}_mu{}_{}_{}.png"\
+longFilePrefix += "h{}_{}{}{}_{}_E0{}_pitch{}_{}_{}.png"\
                 .format(config.h, init,
                         config.initBackwardIterations, config.initBackWardOrder,
-                        config.integrator, config.mu,
+                        config.integrator, config.E0, config.pitch,
                         config.AB_dB_Algorithm, config.emField)
 shortFilePrefix = folderprefix + "last_"
 
@@ -86,7 +86,10 @@ info += "init bwN bwO: {} {} {}\n".format(config.initializationType,
                                           config.initBackwardIterations, config.initBackWardOrder)
 info += "ABdB: {}\n".format(config.AB_dB_Algorithm)
 info += "EMField: {}\n".format(config.emField)
-info += "mu: {}\n".format(config.mu)
+info += "E0: {}\n".format(config.E0)
+info += "pitch: {}\n".format(config.pitch)
+info += "mass: {}\n".format(config.m)
+# info += "lrm_freq: {}\n".format(config.pitch)
 
 fig, ax = plt.subplots(2, 2)
 
