@@ -14,6 +14,8 @@ class InitializationType(Enum):
     HAMILTONIAN = 2
     MANUAL_Z0Z1 = 3
     SIXD_PAULI = 4
+    IMPLICIT3D = 5
+    IMPLICIT3D_HAMILTONIAN = 6
 
 
 class Particle:
@@ -163,6 +165,34 @@ class Particle:
             field = self.system.fieldBuilder.compute(self.z0)
 
             self.p1[:3] = field.b * vpar
+
+        elif init_type == InitializationType.IMPLICIT3D:
+            # Lagrangian initialization for a 3D guiding center integrator.
+            # find z1 from z0 with an auxliary intewgrator.
+            # Find p1 from x0, x1 using the Discrete right Legendre transform
+            auxiliaryIntegrator = integratorFactory(self.config.auxiliaryIntegrator, self.config)
+
+            z0 = np.array(self.z0)
+            for i in range(100):
+                points = z0z1p0p1(z1=z0, z0=None, p0=None, p1=None)
+                points = auxiliaryIntegrator.stepForward(points, self.h / 100)
+                z0 = points.z2
+            self.z1 = z0
+
+            x1 = self.z1[:3]
+            x0 = self.z0[:3]
+            self.p1[:3] = self.integrator.LegendreRight(x0, x1, self.h)
+        elif init_type == InitializationType.IMPLICIT3D_HAMILTONIAN:
+            # Initialization for the 3D guiding center integrator.
+            # Find p0 from x0 using the Dirac constraints p = A + b(b.dot(v)) ...
+            # ... and assuming b.dot(v) = u0, with u0 initial condition given as input
+            field = self.system.fieldBuilder.compute(self.z0)
+            self.z1 = np.array(self.z0)
+
+            self.p1 = np.zeros(4)
+            self.p1[:3] = self.z1[3] * field.b + field.A
+
+
         # compute initial energy
         self.Einit = self.integrator.system.hamiltonian(self.z0)
         self.pphi_init = self.integrator.system.toroidalMomentum(self.z0)

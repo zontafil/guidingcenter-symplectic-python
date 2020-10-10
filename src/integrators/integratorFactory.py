@@ -13,6 +13,7 @@ from integrators.implementations.explicit4 import SymplecticExplicit4
 from integrators.implementations.variationalMidpoint import VariationalMidpoint
 from integrators.implementations.implicit1 import SymplecticImplicit1
 from integrators.implementations.euler import Euler
+from integrators.implementations.implicit3D import Degenerate3D
 
 
 def integratorFactory(integratorName, config):
@@ -44,6 +45,8 @@ def integratorFactory(integratorName, config):
         return SymplecticExplicit4_ThirdOrder(config)
     elif integratorName == "PauliBoris":
         return PauliBoris(config)
+    elif integratorName == "Degenerate3D":
+        return Degenerate3D(config)
     # elif integratorName == "SymplecticExplicit3_GaugeInvariant":
     #     return SymplecticExplicit3_GaugeFree(config)
 
