@@ -1,12 +1,14 @@
 from integrators.integrator import Integrator
 from particleUtils import z2p2
 import numpy as np
+from numpy import linalg as LA
 
 
 class SymplecticExplicit4_GaugeFree(Integrator):
     def __init__(self, config):
         super().__init__(config)
         self.config = config
+        self.file = open("eig.txt", "w+")
         # self.file = open("bhes.txt", "w+")
 
     def stepForward(self, points, h):
@@ -85,5 +87,8 @@ class SymplecticExplicit4_GaugeFree(Integrator):
         Q = - h * Hd1 + h / 4. * np.dot(Hd2, 2. * z1 - 2 * z0)
 
         z2 = np.dot(np.linalg.inv(M), Q) + z0
+
+        v,w = LA.eig(M)
+        self.file.write("{}\n".format(np.abs(v[0])))
 
         return z2p2(z2=z2, p2=None)
