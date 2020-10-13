@@ -7,6 +7,7 @@ from emFields.ABfields.gradShafranov_spline_A import GradShafranovSplineA
 from emFields.ABfields.gradShafranov_spline_AB import GradShafranovSplineAB
 from emFields.ABfields.gradShafranov_analytic_AB import GradShafranov_analytic_AB
 from emFields.AB_dBfields.gradShafranov_analytic_ITER import ITERfield
+from emFields.ABfields.tokamak_Qin import TokamakQin
 
 
 def EMFieldFactory(fieldName, config):
@@ -20,6 +21,8 @@ def EMFieldFactory(fieldName, config):
         return GradShafranov_analytic_AB(config)
     if fieldName == "ITERfield":
         return ITERfield(config)
+    if fieldName == "TokamakQin":
+        return TokamakQin(config)
     # elif fieldName == "ForceFree":
     #     return ForceFree(config)
     # elif fieldName == "TwoDimField":
