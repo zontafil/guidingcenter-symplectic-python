@@ -7,6 +7,8 @@ z1p1 = collections.namedtuple("z1p1", "z1 p1")
 z2p2 = collections.namedtuple("z2p2", "z2 p2")
 
 
+# transform a vector field v from cylindrical to cartesian coordinates
+# v is evaluated at x, where x is in cartesian coordinates
 def cyl2cart(v, x):
     r = np.sqrt(x[0]*x[0] + x[1]*x[1])
     ret = np.zeros(3)

@@ -154,11 +154,6 @@ class Particle:
             self.z1 = z0
             self.z1 = self.z0
 
-            # z0 = np.array(self.z0)
-            # for i in range(50):
-            #     points = z0z1p0p1(z1=z0, z0=None, p0=None, p1=None)
-            #     points = auxiliaryIntegrator.stepForward(points, self.h / 50)
-            #     z0 = points.z2
             vpar = z0[3]
             field = self.system.fieldBuilder.compute(z0)
             vpar = self.z0[3]
@@ -181,7 +176,12 @@ class Particle:
 
             x1 = self.z1[:3]
             x0 = self.z0[:3]
-            self.p1[:3] = self.integrator.LegendreRight(x0, x1, self.h)
+            self.p1 = self.integrator.legendreRight(x0, x1, self.h)
+
+            self.p0 = self.integrator.legendreLeft(x0, x1, self.h)
+            ABdB = self.system.fieldBuilder.compute(self.z0)
+            self.z0[3] = np.linalg.norm(self.p0[:3] - ABdB.A)
+
         elif init_type == InitializationType.IMPLICIT3D_HAMILTONIAN:
             # Initialization for the 3D guiding center integrator.
             # Find p0 from x0 using the Dirac constraints p = A + b(b.dot(v)) ...
@@ -189,10 +189,11 @@ class Particle:
             field = self.system.fieldBuilder.compute(self.z0)
             self.z1 = np.array(self.z0)
 
-            self.p1 = np.zeros(4)
-            self.p1[:3] = self.z1[3] * field.b + field.A
+            self.p1 = self.z1[3] * field.b + field.A
 
+        self.saveInitialEnergy()
 
+    def saveInitialEnergy(self):
         # compute initial energy
         self.Einit = self.integrator.system.hamiltonian(self.z0)
         self.pphi_init = self.integrator.system.toroidalMomentum(self.z0)

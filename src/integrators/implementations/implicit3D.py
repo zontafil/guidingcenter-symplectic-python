@@ -16,17 +16,20 @@ class Degenerate3D(Integrator):
         self.firstGuess = explicitIntegratorFactory(config.firstGuessIntegrator, config)
 
     def stepForward(self, points, h):
-        x2 = self.LegendreLeftInverse(points.z1, points.p1, h)
-        p2_3D = self.LegendreRight(points.z1[:3], x2, h)
 
-        p2 = np.zeros(4)
-        p2[:3] = p2_3D
+        # project (x,v) into u
+        ABdB = self.system.fieldBuilder.compute(points.z1)
+        points.z1[3] = np.linalg.norm(points.p1[:3] - ABdB.A)
+
+        x2 = self.LegendreLeftInverse(points.z1, points.p1, h)
+        p2 = self.legendreRight(points.z1[:3], x2, h)
+
         z2 = np.zeros(4)
         z2[:3] = x2
 
         # project (x,v) into u
         ABdB = self.system.fieldBuilder.compute(z2)
-        z2[3] = np.linalg.norm(p2_3D - ABdB.A)
+        z2[3] = np.linalg.norm(p2[:3] - ABdB.A)
 
         return z2p2(z2, p2)
 
@@ -52,22 +55,24 @@ class Degenerate3D(Integrator):
         dx1_0 = np.array(x1)
         dx1_1 = np.array(x1)
 
-        f = p0 - self.LegendreLeft(x0, x1, h)
+        f = p0 - self.legendreLeft(x0, x1, h)[:3]
 
         for j in range(3):
 
             dx1_1[j] += self.hx
             dx1_0[j] -= self.hx
 
-            df1 = p0 - self.LegendreLeft(x0, dx1_1, h)
-            df0 = p0 - self.LegendreLeft(x0, dx1_0, h)
+            df1 = p0 - self.legendreLeft(x0, dx1_1, h)[:3]
+            df0 = p0 - self.legendreLeft(x0, dx1_0, h)[:3]
 
             Jf[:, j] = 0.5*(df1 - df0) / self.hx
 
         return x1 - np.dot(np.linalg.inv(Jf), f)
 
-    def LegendreLeft(self, x0, x1, h):
-        ret = np.zeros(3)
+    def legendreLeft(self, z0, z1, h):
+        x0 = z0[:3]
+        x1 = z1[:3]
+        ret = np.zeros(4)
 
         for i in range(3):
             dx0_1 = np.array(x0)
@@ -93,8 +98,10 @@ class Degenerate3D(Integrator):
         u = np.dot(ABdB.b, v)
         return (np.dot(ABdB.A, v) + 0.5*u*u - self.config.mu*ABdB.Bnorm)
 
-    def LegendreRight(self, x0, x1, h):
-        ret = np.zeros(3)
+    def legendreRight(self, z0, z1, h):
+        x0 = z0[:3]
+        x1 = z1[:3]
+        ret = np.zeros(4)
 
         for i in range(3):
             dx1_1 = np.array(x1)
