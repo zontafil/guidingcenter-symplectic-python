@@ -13,7 +13,8 @@ from integrators.implementations.explicit4 import SymplecticExplicit4
 from integrators.implementations.variationalMidpoint import VariationalMidpoint
 from integrators.implementations.implicit1 import SymplecticImplicit1
 from integrators.implementations.euler import Euler
-from integrators.implementations.implicit3D import Degenerate3D
+from integrators.implementations.degenerate3D import Degenerate3D
+from integrators.implementations.PauliMidpointImplicit import PauliMidpoint
 
 
 def integratorFactory(integratorName, config):
@@ -23,10 +24,6 @@ def integratorFactory(integratorName, config):
         return Euler(config)
     elif integratorName == "VariationalMidpoint":
         return VariationalMidpoint(config)
-    # elif integratorName == "SymplecticExplicit1":
-    #     return SymplecticExplicit1(config)
-    # elif integratorName == "SymplecticExplicit2":
-    #     return SymplecticExplicit2(config)
     elif integratorName == "SymplecticExplicit3":
         return SymplecticExplicit3(config)
     elif integratorName == "SymplecticExplicit3GaugeFree":
@@ -35,10 +32,6 @@ def integratorFactory(integratorName, config):
         return SymplecticExplicit4(config)
     elif integratorName == "SymplecticImplicit1":
         return SymplecticImplicit1(config)
-    # elif integratorName == "symplecticSemiexplicitQin":
-    #     return SemiexplicitQin(config)
-    # elif integratorName == "symplecticSemiexplicitQinRegularized":
-    #     return SemiexplicitQinReg(config)
     elif integratorName == "SymplecticExplicit4_GaugeInvariant":
         return SymplecticExplicit4_GaugeFree(config)
     elif integratorName == "SymplecticExplicit4_ThirdOrder":
@@ -47,11 +40,7 @@ def integratorFactory(integratorName, config):
         return PauliBoris(config)
     elif integratorName == "Degenerate3D":
         return Degenerate3D(config)
-    # elif integratorName == "SymplecticExplicit3_GaugeInvariant":
-    #     return SymplecticExplicit3_GaugeFree(config)
-
-    # else if (DIM==6){
-    #     if (integratorName=="SymplecticImplicit3D") return new SymplecticImplicit3D<DIM>(config);
-    # }
+    elif integratorName == "PauliMidpoint":
+        return PauliMidpoint(config)
 
     raise Exception("Invalid integrator " + integratorName)

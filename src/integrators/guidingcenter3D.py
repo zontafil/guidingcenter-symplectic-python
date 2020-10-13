@@ -1,15 +1,19 @@
-# implicit midpoint 3D guiding center integrator
-# Based on 4D guiding center Lagrangian, with "u" set to "v.dot(b)"
-# see Zonta master thesis, pag. 94
-# all derivatives are computed numerically, therefore it is slow
+# Guiding Center 3D integrator (u is projected with u = x' * b)
+# Specify the absttract method Lagrangian to implement this class
 from integrators.integrator import Integrator
 from particleUtils import z2p2
 import numpy as np
 from integrators.explicitIntegratorFactory import explicitIntegratorFactory
 from particleUtils import z0z1p0p1
+from abc import abstractmethod
 
 
-class Degenerate3D(Integrator):
+class GuidingcCenter3DIntegrator(Integrator):
+
+    @abstractmethod
+    def Lagrangian(self, x, v):
+        pass
+
     def __init__(self, config):
         super().__init__(config)
         self.hx = 1E-5
@@ -89,14 +93,6 @@ class Degenerate3D(Integrator):
         dx = (x1 - x0) / h
 
         return (h * self.Lagrangian(xalpha, dx))
-
-    def Lagrangian(self, x, v):
-
-        z = np.zeros(4)
-        z[:3] = x
-        ABdB = self.system.fieldBuilder.compute(z)
-        u = np.dot(ABdB.b, v)
-        return (np.dot(ABdB.A, v) + 0.5*u*u - self.config.mu*ABdB.Bnorm)
 
     def legendreRight(self, z0, z1, h):
         x0 = z0[:3]
