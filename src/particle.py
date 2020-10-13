@@ -13,7 +13,7 @@ class InitializationType(Enum):
     LAGRANGIAN = 1
     HAMILTONIAN = 2
     MANUAL_Z0Z1 = 3
-    SIXD_PAULI = 4
+    PAULI_BORIS = 4
     IMPLICIT3D = 5
     IMPLICIT3D_HAMILTONIAN = 6
 
@@ -143,23 +143,18 @@ class Particle:
             if hasattr(self.integrator.__class__, "legendreRight"):
                 self.p1 = self.integrator.legendreRight(self.z0, self.z1, self.h)
 
-        elif init_type == InitializationType.SIXD_PAULI:
-            auxiliaryIntegrator = integratorFactory(self.config.auxiliaryIntegrator, self.config)
-
-            z0 = np.array(self.z0)
-            for i in range(100):
-                points = z0z1p0p1(z1=z0, z0=None, p0=None, p1=None)
-                points = auxiliaryIntegrator.stepForward(points, self.h / 100)
-                z0 = points.z2
-            self.z1 = z0
-            self.z1 = self.z0
-
-            vpar = z0[3]
-            field = self.system.fieldBuilder.compute(z0)
-            vpar = self.z0[3]
+        elif init_type == InitializationType.PAULI_BORIS:
             field = self.system.fieldBuilder.compute(self.z0)
+            self.p0[:3] = field.b * self.z0[3]
 
-            self.p1[:3] = field.b * vpar
+            self.z1 = np.array(self.z0)
+            self.p1 = np.array(self.p0)
+
+            z2p2 = self.integrator.stepForward(self.getPoints(), self.config.h)
+            self.z0 = np.array(self.z1)
+            self.p0 = np.array(self.p1)
+            self.z1 = z2p2.z2
+            self.p1 = z2p2.p2
 
         elif init_type == InitializationType.IMPLICIT3D:
             # Lagrangian initialization for a 3D guiding center integrator.
@@ -176,11 +171,14 @@ class Particle:
 
             x1 = self.z1[:3]
             x0 = self.z0[:3]
-            self.p1 = self.integrator.legendreRight(x0, x1, self.h)
 
+            self.p1 = self.integrator.legendreRight(x0, x1, self.h)
             self.p0 = self.integrator.legendreLeft(x0, x1, self.h)
+
             ABdB = self.system.fieldBuilder.compute(self.z0)
             self.z0[3] = np.linalg.norm(self.p0[:3] - ABdB.A)
+            ABdB = self.system.fieldBuilder.compute(self.z1)
+            self.z1[3] = np.linalg.norm(self.p1[:3] - ABdB.A)
 
         elif init_type == InitializationType.IMPLICIT3D_HAMILTONIAN:
             # Initialization for the 3D guiding center integrator.
@@ -189,7 +187,8 @@ class Particle:
             field = self.system.fieldBuilder.compute(self.z0)
             self.z1 = np.array(self.z0)
 
-            self.p1 = self.z1[3] * field.b + field.A
+            self.p1 = np.zeros(4)
+            self.p1[:3] = self.z1[3] * field.b + field.A
 
         self.saveInitialEnergy()
 
@@ -241,7 +240,10 @@ class Particle:
             self.p0 = self.integrator.legendreLeft(self.z0, self.z1, self.h)
         if hasattr(self.integrator.__class__, "legendreRight"):
             self.p1 = self.integrator.legendreRight(self.z0, self.z1, self.h)
+        if hasattr(self.integrator.__class__, "updateVparFromPoints"):
+            self.integrator.updateVparFromPoints(self.getPoints())
 
+        self.saveInitialEnergy()
         self.computeEnergyError()
 
     def getPoints(self):

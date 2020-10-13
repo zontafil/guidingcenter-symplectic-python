@@ -1,5 +1,5 @@
 from integrators.integrator import Integrator
-from particleUtils import z2p2
+from particleUtils import z2p2, z0z1p0p1
 import numpy as np
 
 
@@ -37,3 +37,33 @@ class PauliBoris(Integrator):
         z2[3] = vpar
 
         return z2p2(z2, p2)
+
+    def legendreLeft(self, z0, z1, h):
+        x0 = z0[:3]
+        x1 = z1[:3]
+        ret = np.zeros(4)
+
+        ret[:3] = (x1 - x0) / h
+
+        return ret
+
+    def legendreRight(self, z0, z1, h):
+        x0 = z0[:3]
+        x1 = z1[:3]
+
+        p0 = np.zeros(4)
+        p0[:3] = (x1 - x0) / h
+
+        points0 = z0z1p0p1(z0=None, p0=None, z1=z0, p1=p0)
+        points1 = self.stepForward(points0, h)
+
+        return points1.p2
+
+    def updateVparFromPoints(self, points):
+        ABdB = self.system.fieldBuilder.compute(points.z0)
+        vpar = np.dot(points.p0[:3], ABdB.B) / ABdB.Bnorm
+        points.z0[3] = vpar
+
+        ABdB = self.system.fieldBuilder.compute(points.z1)
+        vpar = np.dot(points.p1[:3], ABdB.B) / ABdB.Bnorm
+        points.z1[3] = vpar
