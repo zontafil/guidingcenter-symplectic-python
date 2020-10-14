@@ -172,26 +172,26 @@ class Particle:
                 z0 = points.z2
             self.z1 = z0
 
-            x1 = self.z1[:3]
-            x0 = self.z0[:3]
+            self.p1 = self.integrator.legendreRight(self.z0, self.z1, self.h)
+            self.p0 = self.integrator.legendreLeft(self.z0, self.z1, self.h)
 
-            self.p1 = self.integrator.legendreRight(x0, x1, self.h)
-            self.p0 = self.integrator.legendreLeft(x0, x1, self.h)
-
-            ABdB = self.system.fieldBuilder.compute(self.z0)
-            self.z0[3] = np.linalg.norm(self.p0[:3] - ABdB.A)
-            ABdB = self.system.fieldBuilder.compute(self.z1)
-            self.z1[3] = np.linalg.norm(self.p1[:3] - ABdB.A)
+            self.integrator.updateVparFromPoints(self.getPoints())
 
         elif init_type == InitializationType.IMPLICIT3D_HAMILTONIAN:
             # Initialization for the 3D guiding center integrator.
             # Find p0 from x0 using the Dirac constraints p = A + b(b.dot(v)) ...
             # ... and assuming b.dot(v) = u0, with u0 initial condition given as input
-            field = self.system.fieldBuilder.compute(self.z0)
             self.z1 = np.array(self.z0)
-
+            field = self.system.fieldBuilder.compute(self.z1)
             self.p1 = np.zeros(4)
             self.p1[:3] = self.z1[3] * field.b + field.A
+
+            z2p2 = self.integrator.stepForward(self.getPoints(), self.config.h)
+            self.z0 = np.array(self.z1)
+            self.p0 = np.array(self.p1)
+            self.z1 = z2p2.z2
+            self.p1 = z2p2.p2
+            self.integrator.updateVparFromPoints(self.getPoints())
 
         self.saveInitialEnergy()
 

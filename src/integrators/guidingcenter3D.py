@@ -21,10 +21,6 @@ class GuidingcCenter3DIntegrator(Integrator):
 
     def stepForward(self, points, h):
 
-        # project (x,v) into u
-        ABdB = self.system.fieldBuilder.compute(points.z1)
-        points.z1[3] = np.linalg.norm(points.p1[:3] - ABdB.A)
-
         x2 = self.LegendreLeftInverse(points.z1, points.p1, h)
         p2 = self.legendreRight(points.z1[:3], x2, h)
 
@@ -32,8 +28,7 @@ class GuidingcCenter3DIntegrator(Integrator):
         z2[:3] = x2
 
         # project (x,v) into u
-        ABdB = self.system.fieldBuilder.compute(z2)
-        z2[3] = np.linalg.norm(p2[:3] - ABdB.A)
+        self.updateVpar(z2, p2)
 
         return z2p2(z2, p2)
 
@@ -108,3 +103,11 @@ class GuidingcCenter3DIntegrator(Integrator):
             ret[i] = 0.5 * (self.DiscreteLagrangian(x0, dx1_1, h) - self.DiscreteLagrangian(x0, dx1_0, h)) / self.hx
 
         return ret
+
+    def updateVpar(self, z, p):
+        ABdB = self.system.fieldBuilder.compute(z)
+        z[3] = np.dot(p[:3] - ABdB.A, ABdB.b)
+
+    def updateVparFromPoints(self, points):
+        self.updateVpar(points.z0, points.p0)
+        self.updateVpar(points.z1, points.p1)
