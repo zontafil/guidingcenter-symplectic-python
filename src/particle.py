@@ -53,6 +53,7 @@ class Particle:
 
         # normalize variables
         self.h = self.config.h * self.c
+        self.config.h = self.h
 
         if config.debugBfield:
             self.Bout = open(config.debugBfieldFile, "w+")
