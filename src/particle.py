@@ -44,6 +44,8 @@ class Particle:
             self.config.mu = self.config.v0**2 / 2 / field.Bnorm * (1 - self.config.pitch**2)
             self.z0[3] = self.config.pitch * self.config.v0
 
+            print("Vpar computed from pitch and energy: {}".format(self.z0[3]))
+
             A0 = self.config.m*self.c/self.config.q  # 1.7E-3, A_norm = A / A0
             B_real = field.Bnorm * A0
             larm_w = self.config.q * B_real / self.config.m
