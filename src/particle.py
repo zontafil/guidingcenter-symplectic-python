@@ -200,7 +200,7 @@ class Particle:
         self.Einit = self.integrator.system.hamiltonian(self.z0)
         self.pphi_init = self.integrator.system.toroidalMomentum(self.z0)
         self.pphi0 = self.pphi_init
-        self.dpphi0 = self.pphi_init
+        self.dpphi0 = 0
         self.E0 = self.Einit
         self.dE0 = 0
         self.computeEnergyError()
