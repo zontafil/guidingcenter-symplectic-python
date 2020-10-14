@@ -1,6 +1,6 @@
 from config import Config
 from particle import Particle
-from particleUtils import printToFile
+from particleUtils import printToFile, writeHeaderToFile
 import sys
 import getopt
 
@@ -34,7 +34,7 @@ print("mu_0: " + str(config.mu))
 
 # open output file
 out = open(outFile, "w+")
-out.write("t norbit dE1 x1 y1 z1 u1 r1 px1 py1 pz1 pu1 p_phi dz\n")
+writeHeaderToFile(out)
 printToFile(0, config, particle, out, timestep0=True)
 printToFile(1, config, particle, out)
 out.close()

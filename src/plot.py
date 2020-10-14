@@ -1,15 +1,14 @@
 # script used to plot charts from output
 # Usage python3 plot.py -oshort outFile -olong outFile -i input_data
 # olong appends useful config info in the filename
-
 import matplotlib
-matplotlib.use('Agg')
 from matplotlib import pyplot as plt
 from config import Config
 import numpy as np
 import sys
 import getopt
 from particle import InitializationType
+matplotlib.use('Agg')
 
 
 def set_axlims(series, marginfactor):
@@ -77,19 +76,21 @@ y = []
 
 data = np.genfromtxt(inputFile, delimiter=' ', skip_header=0, names=True)
 
+dataB = None
 if config.debugBfield:
     dataB = np.genfromtxt(config.debugBfieldFile, delimiter=' ', skip_header=0, names=True)
 
-info = "timestep t/orbit: {} {}\n".format(config.h, config.stepsPerOrbit)
-info += "integrator: {}\n".format(config.integrator)
+# info = "dT t/orbit: {} {}\n".format(config.h, config.stepsPerOrbit)
+info = "integrator: {}\n".format(config.integrator)
 info += "init bwN bwO: {} {} {}\n".format(config.initializationType,
                                           config.initBackwardIterations, config.initBackWardOrder)
 info += "ABdB: {}\n".format(config.AB_dB_Algorithm)
 info += "EMField: {}\n".format(config.emField)
-info += "E0: {}\n".format(config.E0)
+info += "dT: {}s\n".format(config.h)
+info += "T_L: {:.2e}s\n".format(data["larmorT"][0])
+info += "E: {}KeV\n".format(config.E0)
 info += "pitch: {}\n".format(config.pitch)
-info += "mass: {}\n".format(config.m)
-# info += "lrm_freq: {}\n".format(config.pitch)
+info += "m: {:.1e}kg\n".format(config.m)
 
 fig, ax = plt.subplots(2, 2)
 

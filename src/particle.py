@@ -49,8 +49,8 @@ class Particle:
             A0 = self.config.m*self.c/self.config.q  # 1.7E-3, A_norm = A / A0
             B_real = field.Bnorm * A0
             larm_w = self.config.q * B_real / self.config.m
-            larm_T = 2. * 3.14 / larm_w
-            print("larmor period {}".format(larm_T))
+            self.config.larmorT = 2. * 3.14 / larm_w
+            print("larmor period {}".format(self.config.larmorT))
             print("B {}".format(B_real))
 
         # normalize variables

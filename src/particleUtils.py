@@ -29,6 +29,10 @@ def cart2cyl(v, x):
     return ret
 
 
+def writeHeaderToFile(out):
+    out.write("t norbit dE1 x1 y1 z1 u1 r1 px1 py1 pz1 pu1 p_phi dz larmorT\n")
+
+
 def printToFile(t, config, particle, out, timestep0=False):
     if timestep0 is True:
         z = particle.z0
@@ -49,4 +53,5 @@ def printToFile(t, config, particle, out, timestep0=False):
     dz = np.linalg.norm(particle.z1 - particle.z0)
     dz = particle.dE1 - particle.dE0
 
-    out.write("{} {} {} {} {} {} {} {}\n".format(t, t / config.stepsPerOrbit, dE, z_str, r, p_str, dpphi, dz))
+    out.write("{} {} {} {} {} {} {} {} {}\n".format(t, t / config.stepsPerOrbit, dE,
+                                                    z_str, r, p_str, dpphi, dz, config.larmorT))
