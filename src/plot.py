@@ -75,6 +75,7 @@ x = []
 y = []
 
 data = np.genfromtxt(inputFile, delimiter=' ', skip_header=0, names=True)
+data2 = np.genfromtxt("./lol.txt", delimiter=' ', skip_header=0, names=True)
 
 dataB = None
 if config.debugBfield:
@@ -143,12 +144,15 @@ plt.savefig(shortFilePrefix + "u.png", dpi=300)
 
 # dE
 fig, ax = plt.subplots(1, 1)
-ax.set_ylim(set_axlims(data["dE1"], 0.1))
+# ax.set_ylim(set_axlims(data2["dE1"], 0.1))
 ax.ticklabel_format(style="sci", axis="both", scilimits=(0, 0))
-ax.set(xlabel="timestep", ylabel="dE/E0")
-ax.scatter(data['t'], data['dE1'], s=4, color="black")
+ax.set(xlabel="timestep", ylabel="Energy Error")
+ax.scatter(data2['t'], data2['dE1'], s=4, color="red", label="RK4")
+ax.scatter(data['t'], data['dE1'], s=4, color="black", label="Symplectic")
+legend = plt.legend()
 
 plt.savefig(shortFilePrefix + "dE.png", dpi=200)
+plt.savefig(shortFilePrefix + "dE.eps", dpi=200)
 # pphi
 fig, ax = plt.subplots(1, 1)
 ax.set_ylim(set_axlims(data["p_phi"], 0.1))
